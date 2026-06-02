@@ -31,7 +31,7 @@ echo.
 
 echo [1/2] Starting Spring Boot Backend...
 :: This opens a new terminal window for the backend
-start "DSR Backend" cmd /k "set JAVA_HOME=%JAVA_HOME% && set PATH=%PATH% && cd dsr-backend && echo Starting Backend... && mvnw spring-boot:run"
+start "DSR Backend" cmd /k "cd dsr-backend && run.bat"
 
 echo [2/2] Re-building and Starting Frontend Server...
 start "DSR Frontend" cmd /k "cd iit-pro-1-main && echo Building Templates... && node build.js && echo Starting Local Server... && npx http-server -p 5500 -c-1 -o"
