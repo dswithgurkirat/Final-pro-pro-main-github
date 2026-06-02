@@ -1,0 +1,54 @@
+    <!-- TOPBAR -->
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="tb-left" style="display:flex;align-items:center;gap:32px;" onmouseenter="expandSidebar()"
+        onmouseleave="collapseSidebar()">
+        <!-- Sidebar Toggle -->
+        <button class="tb-action-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+        <!-- Logo similar to home page -->
+        <div class="logo"
+          style="display:flex; align-items:center; gap:15px; font-size:52px; font-weight:800; color:var(--text); cursor:pointer;"
+          onclick="clearActiveProject(); showView('dashboard', null);">
+          <img src="logo/CoE-SEnSRS.jpeg" alt="DSR Logo"
+            style="width:70px; height:70px; object-fit:contain; border-radius:12px;">
+          <span>DSR REPORT</span>
+        </div>
+
+        <!-- Topbar Navigation -->
+        <nav class="tb-nav">
+          <button class="tb-nav-link active"
+            onclick="clearActiveProject(); showView('dashboard',this)">Dashboard</button>
+
+          <div class="tb-nav-dropdown">
+            <button class="tb-nav-link" onclick="showView('projects',this)">Projects <i data-lucide="chevron-down"
+                style="width:14px;height:14px;display:inline-block;vertical-align:middle;"></i></button>
+            <div class="tb-dropdown-menu" id="tb-projects-dropdown">
+              <a href="#" onclick="showView('projects',null); return false;">View All Projects</a>
+              <a href="#" onclick="newProjectModal(); return false;">+ Add New Project</a>
+            </div>
+          </div>
+
+          <button class="tb-nav-link" onclick="showView('workflow',this)">Report Workflow</button>
+        </nav>
+      </div>
+      <div class="tb-right">
+        <span class="tb-district" id="tb-district-badge"
+          style="border: 1px solid transparent; transition: all .3s;">Punjab</span>
+        <label class="theme-switch-wrapper" style="margin-right:8px;">
+          <div class="theme-switch" onclick="toggleDarkMode()">
+            <div class="theme-switch-slider">
+              <i data-lucide="moon"></i>
+            </div>
+          </div>
+        </label>
+        <button class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:4px;"
+          onclick="showView('esign',null)"><i data-lucide="pen-tool" style="width:12px;height:12px;"></i>E-Sign</button>
+        <button class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:4px;"
+          onclick="showView('generate',null)"><i data-lucide="download" style="width:12px;height:12px;"></i>PDF</button>
+        <button class="btn btn-saffron btn-sm" onclick="newProjectModal()">+ New Project</button>
+      </div>
+    </div>
+
+
