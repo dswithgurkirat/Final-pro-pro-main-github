@@ -7,6 +7,26 @@ window.S = window.S || { activeProject: { id: 'demo_proj', anx5PdfName: null }, 
 window.toast = window.toast || function (msg, type) { alert('[' + (type || 'INFO').toUpperCase() + '] ' + msg); };
 window.initLucide = window.initLucide || function () { if (window.lucide) lucide.createIcons(); };
 
+// ── HEADING PERSISTENCE ──
+var ANX5_STORAGE_PREFIX = 'anx5_heading_';
+
+function saveAnx5Heading(el) {
+  var key = el.getAttribute('data-key');
+  if (!key) return;
+  try { localStorage.setItem(ANX5_STORAGE_PREFIX + key, el.innerText); } catch (e) {}
+}
+window.saveAnx5Heading = saveAnx5Heading;
+
+function loadAnx5Headings() {
+  document.querySelectorAll('#view-anx5 .editable-title[data-key]').forEach(function (el) {
+    var key = el.getAttribute('data-key');
+    var saved = null;
+    try { saved = localStorage.getItem(ANX5_STORAGE_PREFIX + key); } catch (e) {}
+    if (saved) el.innerText = saved;
+  });
+}
+window.loadAnx5Headings = loadAnx5Headings;
+
 // ── 1. TEMPLATE DOWNLOAD ──
 function downloadSectionTemplateAnx5(sectionType) {
   let csvContent = "";
@@ -341,7 +361,10 @@ function addAnx5SectionBlock(sectionType) {
   const titleEl = newBlock.querySelector('.editable-title');
   if (titleEl) {
     let baseText = titleEl.innerText.replace(/ - Table \d+:$/, '');
-    titleEl.innerText = `${baseText} - Table ${sectionNum}:`;
+    var newTitle = baseText + ' - Table ' + sectionNum + ':';
+    titleEl.innerText = newTitle;
+    titleEl.setAttribute('data-key', 'anx5-title-' + sectionType + '-' + Date.now());
+    saveAnx5Heading(titleEl);
   }
 
   // Update table ID dynamically
@@ -747,7 +770,7 @@ function renderPdfUploadUIAnx5() {
     nameEl.textContent = pdfName;
     nameEl.style.display = 'inline-block';
     dlBtn.style.display = 'inline-flex';
-    if (delBtn) delBtn.style.display = canEdit ? 'inline-flex' : 'none';
+    if (delBtn) delBtn.style.display = 'inline-flex';
     if (prevBtn) prevBtn.style.display = 'inline-flex';
     if (prevSec && prevSec.style.display === 'block' && iframe && S.activeProject.pdfData?.anx5) {
       if (!iframe.src.includes(S.activeProject.pdfData.anx5)) iframe.src = S.activeProject.pdfData.anx5;
@@ -823,3 +846,8 @@ function handlePDFUploadAnx5(event) {
   event.target.value = '';
 }
 window.handlePDFUploadAnx5 = handlePDFUploadAnx5;
+
+// Restore saved headings on page load
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(loadAnx5Headings, 50);
+});
