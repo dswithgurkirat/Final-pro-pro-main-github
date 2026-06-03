@@ -20,6 +20,32 @@ function addRow(tableId, cells) {
 
 
 function downloadAnxTemplate(n) {
+  let csvContent = "";
+  let filename = "";
+  
+  if (n === 5) {
+    csvContent = "Point Name,Type (Bench Mark/CORS),Latitude,Longitude,Elevation (m),Remarks\n";
+    filename = "Annexure_V_Benchmarks_Template.csv";
+  } else if (n === 6) {
+    csvContent = "Cluster No.,River,Total Area (Ha),Total Excavation (MT),Mineral @60% (MT),Status (Approved/Pending)\n";
+    filename = "Annexure_VI_Final_Clusters_Template.csv";
+  } else if (n === 7) {
+    csvContent = "Owner Name,Patta No.,Area (Ha),District,Tehsil,Village,Remarks\n";
+    filename = "Annexure_VII_Patta_Lands_Template.csv";
+  } else {
+    toast(`⬇ Annexure ${toRoman(n)} Excel template downloaded`,'success');
+    return;
+  }
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
   toast(`⬇ Annexure ${toRoman(n)} Excel template downloaded`,'success');
 }
 
@@ -202,7 +228,17 @@ function handleTableUpload(e) {
   e.target.value = '';
 }
 
-function exportAnxPDF(n) { toast(`📄 Annexure ${typeof n==='number'?toRoman(n):n} PDF exported`,'success'); }
+function exportAnxPDF(n) {
+  if (n === 5 && typeof exportAnx5PDF === 'function') {
+    exportAnx5PDF();
+  } else if (n === 6 && typeof exportAnx6PDF === 'function') {
+    exportAnx6PDF();
+  } else if (n === 7 && typeof exportAnx7PDF === 'function') {
+    exportAnx7PDF();
+  } else {
+    toast(`📄 Annexure ${typeof n==='number'?toRoman(n):n} PDF exported`,'success');
+  }
+}
 
 function toRoman(n) { return ['I','II','III','IV','V','VI','VII'][n-1]||n; }
 

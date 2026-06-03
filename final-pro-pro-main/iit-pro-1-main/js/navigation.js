@@ -162,6 +162,9 @@ function showView(id, btn, push = true) {
   if (id==='anx2' && typeof renderPdfUploadUIAnx2 === 'function') renderPdfUploadUIAnx2();
   if (id==='anx3' && typeof renderPdfUploadUI === 'function') renderPdfUploadUI();
   if (id==='anx4' && typeof renderPdfUploadUIAnx4 === 'function') renderPdfUploadUIAnx4();
+  if (id==='anx5' && typeof renderPdfUploadUIAnx5 === 'function') renderPdfUploadUIAnx5();
+  if (id==='anx6' && typeof renderPdfUploadUIAnx6 === 'function') renderPdfUploadUIAnx6();
+  if (id==='anx7' && typeof renderPdfUploadUIAnx7 === 'function') renderPdfUploadUIAnx7();
   if (S.activeProject && typeof updateActiveProjectCardUI === 'function') updateActiveProjectCardUI();
   
   renderDistrictLegends();

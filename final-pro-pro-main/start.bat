@@ -33,8 +33,10 @@ echo [1/2] Starting Spring Boot Backend...
 :: This opens a new terminal window for the backend
 start "DSR Backend" cmd /k "cd dsr-backend && run.bat"
 
-echo [2/2] Re-building and Starting Frontend Server...
-start "DSR Frontend" cmd /k "cd iit-pro-1-main && echo Building Templates... && node build.js && echo Starting Local Server... && npx http-server -p 5500 -c-1 -o"
+echo [2/2] Starting Frontend Watcher and Server...
+start "DSR Frontend (Watcher)" cmd /k "cd iit-pro-1-main && echo Watching Templates for changes... && node build.js --watch"
+timeout /t 3 /nobreak >nul
+start "DSR Frontend (Server)" cmd /k "cd iit-pro-1-main && echo Starting Local Server... && npx http-server -p 5500 -c-1 -o"
 
 echo.
 echo Both services have been launched in separate windows!
