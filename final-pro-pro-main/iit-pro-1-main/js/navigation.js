@@ -145,7 +145,7 @@ function showView(id, btn, push = true) {
     'graphs':'Cross Section Graph Generator','anx1':'Annexure I — Sand Sources',
     'anx2':'Annexure II — Mining Leases','anx3':'Annexure III — Cluster Details',
     'anx4':'Annexure IV — Transportation Routes','anx5':'Annexure V — Bench Mark & CORS',
-    'anx6':'Annexure VI — Final Cluster Details','anx7':'Annexure VII — Final Patta Lands',
+    'anx6':'Annexure VI — Final Cluster Details','anx7':'Annexure VII — Transportation Routes',
     'annexures-extra':'Additional Annexures','demand-table':'Projected Demand Table',
     'auction-table':'Auctioned Sites','summary-table':'Source Summary Table','benchmark-table':'Bench Mark & CORS',
     'esign':'E-Signature Panel','generate':'Generate Final PDF','history':'Report History','users':'User Management'
