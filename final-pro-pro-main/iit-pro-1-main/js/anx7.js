@@ -673,9 +673,8 @@ function renderPdfUploadUIAnx7() {
   els.dl.style.display = 'inline-flex';
   if (els.del) els.del.style.display = 'inline-flex';
   if (els.prev) els.prev.style.display = 'inline-flex';
-  if (els.sec && els.sec.style.display === 'block' && els.iframe) {
-    const url = API_BASE_URL + '/download-pdf?projectId=' + S.activeProject.id + '&annexureId=anx7&inline=true';
-    if (!els.iframe.src.includes('anx7')) els.iframe.src = url;
+  if (els.sec && els.sec.style.display === 'block' && els.iframe && S.activeProject?.pdfData?.anx7) {
+    els.iframe.src = S.activeProject.pdfData.anx7;
   }
   if (window.initLucide) window.initLucide();
 }
@@ -687,9 +686,11 @@ function togglePDFPreviewAnx7() {
   if (!sec || !iframe) return;
   if (sec.style.display === 'block') {
     closePDFPreviewAnx7();
-  } else if (S.activeProject?.anx7PdfName) {
-    iframe.src = API_BASE_URL + '/download-pdf?projectId=' + S.activeProject.id + '&annexureId=anx7&inline=true';
+  } else if (S.activeProject?.pdfData?.anx7) {
+    iframe.src = S.activeProject.pdfData.anx7;
     sec.style.display = 'block';
+  } else {
+    toast('No PDF preview available. Please re-upload.', 'warn');
   }
 }
 window.togglePDFPreviewAnx7 = togglePDFPreviewAnx7;
@@ -708,37 +709,23 @@ window.closePDFPreviewAnx7 = closePDFPreviewAnx7;
 function downloadPdfAnx7() {
   if (!S.activeProject?.anx7PdfName) { toast('No PDF uploaded yet.', 'warn'); return; }
   const a = document.createElement('a');
-  a.href = API_BASE_URL + '/download-pdf?projectId=' + S.activeProject.id + '&annexureId=anx7';
+  a.href = S.activeProject.pdfData?.anx7 || '';
   a.download = S.activeProject.anx7PdfName;
   a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 window.downloadPdfAnx7 = downloadPdfAnx7;
 
-async function deletePdfAnx7() {
+function deletePdfAnx7() {
   if (!S.activeProject || !confirm('Delete the uploaded PDF?')) return;
   closePDFPreviewAnx7();
-  toast('Deleting...', 'info');
-  try {
-    const data = await apiFetch('/upload-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ projectId: S.activeProject.id, fileName: null, pdf: null, annexureId: 'anx7' })
-    });
-    if (data.success) {
-      S.activeProject.anx7PdfName = null;
-      const index = S.projects.findIndex(p => p.id === S.activeProject.id);
-      if (index >= 0) S.projects[index].anx7PdfName = null;
-      renderPdfUploadUIAnx7();
-      toast('PDF deleted.', 'success');
-    } else {
-      toast('Delete failed: ' + (data.error || 'Unknown error'), 'error');
-    }
-  } catch (error) {
-    toast('Delete error: ' + error.message, 'error');
-  }
+  S.activeProject.anx7PdfName = null;
+  if (S.activeProject.pdfData) S.activeProject.pdfData.anx7 = null;
+  const pi = S.projects.findIndex(p => p.id === S.activeProject.id);
+  if (pi >= 0) { S.projects[pi].anx7PdfName = null; if (S.projects[pi].pdfData) S.projects[pi].pdfData.anx7 = null; }
+  renderPdfUploadUIAnx7();
+  if (window.debouncedSaveState) window.debouncedSaveState();
+  toast('PDF deleted.', 'success');
 }
 window.deletePdfAnx7 = deletePdfAnx7;
 
@@ -747,34 +734,19 @@ function handlePDFUploadAnx7(event) {
   if (!file) return;
   if (!file.name.toLowerCase().endsWith('.pdf')) { toast('Only PDF files allowed.', 'error'); event.target.value = ''; return; }
   if (!S.activeProject) { toast('Select a project first.', 'warn'); event.target.value = ''; return; }
-  toast('Uploading PDF...', 'info');
-  const reader = new FileReader();
-  reader.onload = async function (e) {
-    const b64 = e.target.result.split(',')[1];
-    try {
-      const data = await apiFetch('/upload-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: S.activeProject.id, fileName: file.name, pdf: b64, annexureId: 'anx7' })
-      });
-      if (data.success) {
-        S.activeProject.anx7PdfName = file.name;
-        const index = S.projects.findIndex(p => p.id === S.activeProject.id);
-        if (index >= 0) S.projects[index].anx7PdfName = file.name;
-        const iframe = document.getElementById('pdf-iframe-anx7');
-        const sec = document.getElementById('pdf-preview-section-anx7');
-        if (iframe && sec) { iframe.src = URL.createObjectURL(file); sec.style.display = 'block'; }
-        renderPdfUploadUIAnx7();
-        toast('PDF uploaded!', 'success');
-      } else {
-        toast('Upload rejected: ' + (data.error || 'Server did not accept the file'), 'error');
-      }
-    } catch (error) {
-      toast('Upload error: ' + error.message, 'error');
-    }
-    event.target.value = '';
-  };
-  reader.readAsDataURL(file);
+  const fileURL = URL.createObjectURL(file);
+  S.activeProject.anx7PdfName = file.name;
+  if (!S.activeProject.pdfData) S.activeProject.pdfData = {};
+  S.activeProject.pdfData.anx7 = fileURL;
+  const pi = S.projects.findIndex(p => p.id === S.activeProject.id);
+  if (pi >= 0) { S.projects[pi].anx7PdfName = file.name; if (!S.projects[pi].pdfData) S.projects[pi].pdfData = {}; S.projects[pi].pdfData.anx7 = fileURL; }
+  const iframe = document.getElementById('pdf-iframe-anx7');
+  const sec = document.getElementById('pdf-preview-section-anx7');
+  if (iframe && sec) { iframe.src = fileURL; sec.style.display = 'block'; }
+  renderPdfUploadUIAnx7();
+  if (window.debouncedSaveState) window.debouncedSaveState();
+  toast('PDF uploaded and preview loaded!', 'success');
+  event.target.value = '';
 }
 window.handlePDFUploadAnx7 = handlePDFUploadAnx7;
 
