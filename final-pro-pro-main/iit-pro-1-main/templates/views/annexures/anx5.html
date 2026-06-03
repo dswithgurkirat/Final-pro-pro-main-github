@@ -15,12 +15,13 @@
         PDF</button>
       <button id="anx5-delete-btn" class="btn btn-danger btn-sm" style="display:none; align-items:center; gap:6px;"
         onclick="deletePdfAnx5()"><i data-lucide="trash-2" style="width:14px; height:14px;"></i> Delete PDF</button>
-      <label class="btn btn-pdf-upload btn-sm"
+      <label for="anx5-pdf-input" class="btn btn-pdf-upload btn-sm"
         style="cursor:pointer; margin-bottom:0; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="upload" style="width:14px; height:14px;"></i>
         <span>Upload PDF</span>
-        <input type="file" accept="application/pdf" id="anx5-pdf-input" hidden onchange="handlePDFUploadAnx5(event)">
       </label>
+      <input type="file" accept="application/pdf" id="anx5-pdf-input"
+        style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;overflow:hidden" onchange="handlePDFUploadAnx5(event)">
     </div>
   </div>
 
@@ -53,9 +54,11 @@
         <div class="anx-section anx5-section-a-block" id="anx5-sec1">
           <div class="anx-section-header"
             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-            <div class="anx-section-title" style="font-weight:bold; font-size:14px;"><span class="editable-title"
-                data-key="anx5-title-A" contenteditable="true" style="border-bottom:1px dashed var(--border-2); outline:none; cursor:text; padding:2px 4px; border-radius:4px; transition:background 0.2s;" onmouseenter="this.style.background='var(--off)'" onmouseleave="this.style.background='transparent'" oninput="saveAnx5Heading(this)">a) Final List
-                of Potential Mining Leases (Existing &amp; Proposed) Rivers:</span></div>
+            <div class="anx-section-title" style="font-weight:bold; font-size:14px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="pencil-line" style="width:14px; height:14px; color:var(--primary); flex-shrink:0;"></i>
+              <span class="editable-title" data-key="anx5-title-A" contenteditable="true"
+                onblur="saveAnx5Heading(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+                style="border-bottom:2px dashed #94a3b8; outline:none; cursor:text; padding:2px 6px; border-radius:4px; min-width:80px;">a) Final List of Potential Mining Leases (Existing &amp; Proposed) Rivers:</span></div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-excel-template btn-xs" onclick="downloadSectionTemplateAnx5('A')"
                 style="display:inline-flex; align-items:center; gap:6px;">
@@ -173,9 +176,11 @@
         <div class="anx-section anx5-section-b-block" id="anx5-sec2">
           <div class="anx-section-header"
             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-            <div class="anx-section-title" style="font-weight:bold; font-size:14px;"><span class="editable-title"
-                data-key="anx5-title-B" contenteditable="true" style="border-bottom:1px dashed var(--border-2); outline:none; cursor:text; padding:2px 4px; border-radius:4px; transition:background 0.2s;" onmouseenter="this.style.background='var(--off)'" onmouseleave="this.style.background='transparent'" oninput="saveAnx5Heading(this)">b) Final Patta
-                Lands / Khatedari Land (Existing &amp; Proposed):</span></div>
+            <div class="anx-section-title" style="font-weight:bold; font-size:14px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="pencil-line" style="width:14px; height:14px; color:var(--primary); flex-shrink:0;"></i>
+              <span class="editable-title" data-key="anx5-title-B" contenteditable="true"
+                onblur="saveAnx5Heading(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+                style="border-bottom:2px dashed #94a3b8; outline:none; cursor:text; padding:2px 6px; border-radius:4px; min-width:80px;">b) Final Patta Lands / Khatedari Land (Existing &amp; Proposed):</span></div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-excel-template btn-xs" onclick="downloadSectionTemplateAnx5('B')"
                 style="display:inline-flex; align-items:center; gap:6px;">
@@ -284,9 +289,11 @@
         <div class="anx-section anx5-section-c-block" id="anx5-sec3">
           <div class="anx-section-header"
             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-            <div class="anx-section-title" style="font-weight:bold; font-size:14px;"><span class="editable-title"
-                data-key="anx5-title-C" contenteditable="true" style="border-bottom:1px dashed var(--border-2); outline:none; cursor:text; padding:2px 4px; border-radius:4px; transition:background 0.2s;" onmouseenter="this.style.background='var(--off)'" onmouseleave="this.style.background='transparent'" oninput="saveAnx5Heading(this)">c) De-Siltation
-                Location: (Lakes/Ponds/Dams etc.) (Existing &amp; Proposed):</span></div>
+            <div class="anx-section-title" style="font-weight:bold; font-size:14px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="pencil-line" style="width:14px; height:14px; color:var(--primary); flex-shrink:0;"></i>
+              <span class="editable-title" data-key="anx5-title-C" contenteditable="true"
+                onblur="saveAnx5Heading(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+                style="border-bottom:2px dashed #94a3b8; outline:none; cursor:text; padding:2px 6px; border-radius:4px; min-width:80px;">c) De-Siltation Location: (Lakes/Ponds/Dams etc.) (Existing &amp; Proposed):</span></div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-excel-template btn-xs" onclick="downloadSectionTemplateAnx5('C')"
                 style="display:inline-flex; align-items:center; gap:6px;">
@@ -383,9 +390,11 @@
         <div class="anx-section anx5-section-d-block" id="anx5-sec4">
           <div class="anx-section-header"
             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-            <div class="anx-section-title" style="font-weight:bold; font-size:14px;"><span class="editable-title"
-                data-key="anx5-title-D" contenteditable="true" style="border-bottom:1px dashed var(--border-2); outline:none; cursor:text; padding:2px 4px; border-radius:4px; transition:background 0.2s;" onmouseenter="this.style.background='var(--off)'" onmouseleave="this.style.background='transparent'" oninput="saveAnx5Heading(this)">d) M-Sand
-                Plants: (Existing &amp; Proposed):</span></div>
+            <div class="anx-section-title" style="font-weight:bold; font-size:14px; display:flex; align-items:center; gap:6px;">
+              <i data-lucide="pencil-line" style="width:14px; height:14px; color:var(--primary); flex-shrink:0;"></i>
+              <span class="editable-title" data-key="anx5-title-D" contenteditable="true"
+                onblur="saveAnx5Heading(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+                style="border-bottom:2px dashed #94a3b8; outline:none; cursor:text; padding:2px 6px; border-radius:4px; min-width:80px;">d) M-Sand Plants: (Existing &amp; Proposed):</span></div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-excel-template btn-xs" onclick="downloadSectionTemplateAnx5('D')"
                 style="display:inline-flex; align-items:center; gap:6px;">

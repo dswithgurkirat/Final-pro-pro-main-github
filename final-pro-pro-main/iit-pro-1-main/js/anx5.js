@@ -13,7 +13,7 @@ var ANX5_STORAGE_PREFIX = 'anx5_heading_';
 function saveAnx5Heading(el) {
   var key = el.getAttribute('data-key');
   if (!key) return;
-  try { localStorage.setItem(ANX5_STORAGE_PREFIX + key, el.innerText); } catch (e) {}
+  try { localStorage.setItem(ANX5_STORAGE_PREFIX + key, el.innerText.trim()); } catch (e) {}
 }
 window.saveAnx5Heading = saveAnx5Heading;
 
@@ -363,8 +363,9 @@ function addAnx5SectionBlock(sectionType) {
     let baseText = titleEl.innerText.replace(/ - Table \d+:$/, '');
     var newTitle = baseText + ' - Table ' + sectionNum + ':';
     titleEl.innerText = newTitle;
-    titleEl.setAttribute('data-key', 'anx5-title-' + sectionType + '-' + Date.now());
-    saveAnx5Heading(titleEl);
+    var newKey = 'anx5-title-' + sectionType + '-' + Date.now();
+    titleEl.setAttribute('data-key', newKey);
+    try { localStorage.setItem(ANX5_STORAGE_PREFIX + newKey, newTitle); } catch (e) {}
   }
 
   // Update table ID dynamically
@@ -386,6 +387,8 @@ function addAnx5SectionBlock(sectionType) {
   }
 
   wrapper.appendChild(newBlock);
+
+  if (window.initLucide) window.initLucide();
 
   // Automatically add 1 empty default row
   const addRowBtn = newBlock.querySelector('.section-footer button');

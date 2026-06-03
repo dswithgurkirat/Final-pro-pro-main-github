@@ -1,6 +1,6 @@
 // api.js - Centralized Backend Communication
 
-const API_BASE_URL = 'http://localhost:8080/api';
+var API_BASE_URL = 'http://localhost:8080/api';
 
 async function apiFetch(endpoint, options = {}) {
     const token = localStorage.getItem('dsr_token');
@@ -19,10 +19,17 @@ async function apiFetch(endpoint, options = {}) {
             headers
         });
 
-        const data = await response.json().catch(() => ({}));
+        var bodyText = '';
+        try { bodyText = await response.text(); } catch (e) {}
+        var data = {};
+        try { data = JSON.parse(bodyText); } catch (e) {}
 
         if (!response.ok) {
-            throw new Error(data.message || 'API Error');
+            var msg = data.message || data.error || '';
+            if (!msg && bodyText && !bodyText.startsWith('{')) msg = bodyText.slice(0, 200);
+            if (!msg) msg = 'HTTP ' + response.status + ' ' + response.statusText;
+            var prefix = !localStorage.getItem('dsr_token') ? 'Not logged in — ' : '';
+            throw new Error(prefix + msg);
         }
         return data;
     } catch (error) {
@@ -52,7 +59,15 @@ async function apiUploadFile(file) {
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-            throw new Error(data.message || 'API Error');
+            var bodyText = '';
+            try { bodyText = await response.text(); } catch (e) {}
+            var errData = {};
+            try { errData = JSON.parse(bodyText); } catch (e) {}
+            var msg = errData.message || errData.error || '';
+            if (!msg && bodyText && !bodyText.startsWith('{')) msg = bodyText.slice(0, 200);
+            if (!msg) msg = 'HTTP ' + response.status + ' ' + response.statusText;
+            var prefix = !localStorage.getItem('dsr_token') ? 'Not logged in — ' : '';
+            throw new Error(prefix + msg);
         }
         return data;
     } catch (error) {
