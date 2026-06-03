@@ -182,6 +182,7 @@ async function openProject(id) {
       if (stateSnapshot.summarySources) S.summarySources = stateSnapshot.summarySources;
       if (stateSnapshot.auctionData) S.auctionData = stateSnapshot.auctionData;
       if (stateSnapshot.uploadedPDFs) S.uploadedPDFs = stateSnapshot.uploadedPDFs;
+      if (stateSnapshot.chapterPDFs) S.chapterPDFs = stateSnapshot.chapterPDFs;
       if (stateSnapshot.anx6PdfName) {
         S.activeProject.anx6PdfName = stateSnapshot.anx6PdfName;
         const index = S.projects.findIndex(p => p.id === S.activeProject.id);
@@ -239,6 +240,7 @@ async function persistProjectState() {
     summarySources: S.summarySources,
     auctionData: S.auctionData,
     uploadedPDFs: S.uploadedPDFs,
+    chapterPDFs: S.chapterPDFs,
     anx6PdfName: S.activeProject.anx6PdfName,
     anx7PdfName: S.activeProject.anx7PdfName
   };

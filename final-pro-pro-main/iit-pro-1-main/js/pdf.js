@@ -105,8 +105,32 @@ function generateFinalPDF() {
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(60,60,80);
     const lines=doc.splitTextToSize(ch.summary, W-2*pad);
     doc.text(lines, pad, y); y+=lines.length*6+8;
-    doc.setFontSize(9); doc.setTextColor(120,120,140);
-    doc.text('[Full chapter content to be included from uploaded PDF or text data]', pad, y);
+    const chapterPages = S.chapterPDFs && S.chapterPDFs[ch.id];
+    if (chapterPages && chapterPages.length) {
+      doc.setFontSize(9); doc.setTextColor(120,120,140);
+      doc.text(`[Chapter content appended from uploaded file: ${ch.fileName || 'document.pdf'}]`, pad, y);
+
+      chapterPages.forEach((img, pageIdx) => {
+        doc.addPage();
+        doc.setFillColor(...navyArr); doc.rect(0, 0, W, 14, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
+        doc.text(`DISTRICT SURVEY REPORT — ${dist.toUpperCase()} · EMGSM 2020`, W/2, 8, {align:'center'});
+        doc.text(`CHAPTER ${i+1} — UPLOADED CONTENT (Pg ${pageIdx + 1}/${chapterPages.length})`, W-pad, 8, {align:'right'});
+        doc.setDrawColor(224,123,0); doc.setLineWidth(0.8); doc.line(pad,15,W-pad,15);
+
+        doc.setDrawColor(200,200,200); doc.setLineWidth(0.5);
+        doc.rect(pad, 20, W - 2*pad, 260); // Frame
+
+        try {
+          doc.addImage(img, 'PNG', pad + 1, 21, W - 2*pad - 2, 258);
+        } catch(e) {
+          try { doc.addImage(img, 'JPEG', pad + 1, 21, W - 2*pad - 2, 258); } catch(_){}
+        }
+      });
+    } else {
+      doc.setFontSize(9); doc.setTextColor(120,120,140);
+      doc.text('[Full chapter content to be included from uploaded PDF or text data]', pad, y);
+    }
   });
 
   // GRAPHS DATA WITH CANVAS EXTRACTION

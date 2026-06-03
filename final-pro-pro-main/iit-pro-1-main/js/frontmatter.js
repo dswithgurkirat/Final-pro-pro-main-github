@@ -18,9 +18,9 @@ if (!S.frontMatter) {
 }
 
 // Global functions matching inline HTML onclick/onchange handlers
-function trigUp(id) { 
+function trigUp(id) {
   const el = document.getElementById(id);
-  if (el) el.click(); 
+  if (el) el.click();
 }
 
 function syncPreview() {
@@ -34,37 +34,37 @@ function syncPreview() {
  */
 function renderPdfToImages(file, callback) {
   const fileReader = new FileReader();
-  fileReader.onload = function() {
+  fileReader.onload = function () {
     const typedarray = new Uint8Array(this.result);
     if (typeof pdfjsLib === 'undefined') {
       callback(new Error('PDF.js library is not loaded on this page.'), null);
       return;
     }
-    
+
     // Set up PDF.js worker if not already set
     if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     }
-    
-    pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+
+    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
       const pageImages = [];
       let pagesRendered = 0;
       const numPages = pdf.numPages;
-      
+
       function renderPage(pageNum) {
-        pdf.getPage(pageNum).then(function(page) {
+        pdf.getPage(pageNum).then(function (page) {
           const viewport = page.getViewport({ scale: 1.5 }); // High quality preview scale
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
           canvas.height = viewport.height;
           canvas.width = viewport.width;
-          
+
           const renderContext = {
             canvasContext: context,
             viewport: viewport
           };
-          
-          page.render(renderContext).promise.then(function() {
+
+          page.render(renderContext).promise.then(function () {
             // Convert page canvas to high-quality JPEG to minimize final PDF size
             const imgData = canvas.toDataURL('image/jpeg', 0.85);
             pageImages.push(imgData);
@@ -77,17 +77,17 @@ function renderPdfToImages(file, callback) {
           }).catch(err => callback(err, null));
         }).catch(err => callback(err, null));
       }
-      
+
       renderPage(1);
     }).catch(err => callback(err, null));
   };
   fileReader.readAsArrayBuffer(file);
 }
 
-async function handleFMUpload(e, type) {
-  const f = e.target.files[0]; 
+function handleFMUpload(e, type) {
+  const f = e.target.files[0];
   if (!f) return;
-  
+
   const el = document.getElementById(`fm-${type}-file`);
   if (el) {
     el.innerHTML = `
@@ -95,50 +95,40 @@ async function handleFMUpload(e, type) {
         <div class="file-icon" style="background:#fee2e2">📄</div>
         <div class="file-info">
           <div class="file-name">${f.name}</div>
-          <div class="file-meta">Uploading to Backend...</div>
+          <div class="file-meta">${(f.size / 1024).toFixed(1)} KB</div>
         </div>
-        <span class="badge badge-amber">⏳ Uploading</span>
+        <span class="badge badge-green">✓ Ready</span>
       </div>`;
   }
-  
-  // Try uploading to backend
-  try {
-    const uploadData = await apiUploadFile(f);
-    console.log("File uploaded to backend MinIO:", uploadData);
-    toast(`☁️ ${f.name} uploaded to server successfully!`, 'success');
 
-    if (el) {
-      el.querySelector('.file-meta').textContent = `${(f.size/1024).toFixed(1)} KB (Saved to MinIO)`;
-      const badge = el.querySelector('.badge');
-      badge.className = 'badge badge-green';
-      badge.textContent = '✓ Uploaded & Ready';
-    }
-  } catch (error) {
-    console.error("Backend upload failed", error);
-    toast(`⚠️ Upload to server failed, but will still preview locally.`, 'error');
-  }
-
-  // If PDF, convert pages to images and store in S.uploadedPDFs for local preview/pdf-gen
+  // If PDF, convert pages to images and store in S.uploadedPDFs
   if (f.type === 'application/pdf') {
     renderPdfToImages(f, (err, imgs) => {
-      if (err) { 
-        console.error(err); 
+      if (err) {
+        console.error(err);
         toast('⚠️ PDF render failed, falling back to basic preview', 'error');
         // Fallback: Store the blob URL
         const url = URL.createObjectURL(f);
         if (!S.uploadedPDFs) S.uploadedPDFs = {};
         S.uploadedPDFs[type] = [url];
-        return; 
+        if (window.pdfPreview) window.pdfPreview.notifyUpdate('front-matter');
+        if (window.debouncedSaveState) window.debouncedSaveState();
+        return;
       }
       if (!S.uploadedPDFs) S.uploadedPDFs = {};
       S.uploadedPDFs[type] = imgs;
-      toast(`📄 ${f.name} processed for preview!`, 'success');
+      toast(`📄 ${f.name} uploaded and processed successfully!`, 'success');
+      if (window.pdfPreview) window.pdfPreview.notifyUpdate('front-matter');
+      if (window.debouncedSaveState) window.debouncedSaveState();
     });
   } else {
     // Non-PDF files: store as object URL for preview
     const url = URL.createObjectURL(f);
     if (!S.uploadedPDFs) S.uploadedPDFs = {};
     S.uploadedPDFs[type] = [url];
+    toast(`📄 ${f.name} uploaded`, 'success');
+    if (window.pdfPreview) window.pdfPreview.notifyUpdate('front-matter');
+    if (window.debouncedSaveState) window.debouncedSaveState();
   }
 }
 
@@ -152,48 +142,35 @@ function loadFrontMatter() {
   }
 
   const f = S.frontMatter;
-  
-  // 1. Hook up inputs with IDs
-  const titleEl = document.getElementById('fm-title');
-  if (titleEl) titleEl.value = f.title;
-  
-  const distEl = document.getElementById('fm-district');
-  if (distEl) distEl.value = f.district;
-  
-  const yearEl = document.getElementById('fm-year');
-  if (yearEl) yearEl.value = f.year;
-  
-  const prefaceEl = document.getElementById('fm-preface');
-  if (prefaceEl) prefaceEl.value = f.preface;
 
-  // 2. Find inputs without IDs by searching labels
-  const labels = Array.from(document.querySelectorAll('#view-front-matter label'));
-  
-  const stateLabel = labels.find(el => el.textContent.trim() === 'State');
-  if (stateLabel && stateLabel.nextElementSibling) {
-    stateLabel.nextElementSibling.value = f.state;
-  }
-  
-  const versionLabel = labels.find(el => el.textContent.trim() === 'Version');
-  if (versionLabel && versionLabel.nextElementSibling) {
-    versionLabel.nextElementSibling.value = f.version;
-  }
-  
-  const prepLabel = labels.find(el => el.textContent.trim() === 'Prepared By');
-  if (prepLabel && prepLabel.nextElementSibling) {
-    prepLabel.nextElementSibling.value = f.preparedBy;
-  }
-  
-  const assistLabel = labels.find(el => el.textContent.trim() === 'Assisted By');
-  if (assistLabel && assistLabel.nextElementSibling) {
-    assistLabel.nextElementSibling.value = f.assistedBy;
-  }
-  
-  const ackLabel = labels.find(el => el.textContent.trim() === 'Acknowledgement Text');
-  if (ackLabel && ackLabel.nextElementSibling) {
-    ackLabel.nextElementSibling.value = f.acknowledgement;
-  }
-  
+  // Hook up inputs directly with their explicit IDs
+  const titleEl = document.getElementById('fm-title');
+  if (titleEl) titleEl.value = f.title || '';
+
+  const distEl = document.getElementById('fm-district');
+  if (distEl) distEl.value = f.district || '';
+
+  const yearEl = document.getElementById('fm-year');
+  if (yearEl) yearEl.value = f.year || '';
+
+  const prefaceEl = document.getElementById('fm-preface');
+  if (prefaceEl) prefaceEl.value = f.preface || '';
+
+  const stateEl = document.getElementById('fm-state');
+  if (stateEl) stateEl.value = f.state || '';
+
+  const versionEl = document.getElementById('fm-version');
+  if (versionEl) versionEl.value = f.version || '';
+
+  const prepEl = document.getElementById('fm-prepared-by');
+  if (prepEl) prepEl.value = f.preparedBy || '';
+
+  const assistEl = document.getElementById('fm-assisted-by');
+  if (assistEl) assistEl.value = f.assistedBy || '';
+
+  const ackEl = document.getElementById('fm-acknowledgement');
+  if (ackEl) ackEl.value = f.acknowledgement || '';
+
   // Clean up any old upload previews when reloading a project
   ['cover', 'cert', 'toc', 'pref'].forEach(type => {
     const el = document.getElementById(`fm-${type}-file`);
@@ -213,40 +190,6 @@ function loadFrontMatter() {
       }
     }
   });
-
-  // RBAC implementation
-  const isReadOnly = S.role !== 'user';
-  const inputsToDisable = [
-    titleEl, distEl, yearEl, prefaceEl,
-    stateLabel ? stateLabel.nextElementSibling : null,
-    versionLabel ? versionLabel.nextElementSibling : null,
-    prepLabel ? prepLabel.nextElementSibling : null,
-    assistLabel ? assistLabel.nextElementSibling : null,
-    ackLabel ? ackLabel.nextElementSibling : null
-  ];
-  
-  inputsToDisable.forEach(input => {
-    if (input) {
-      input.disabled = isReadOnly;
-      if (isReadOnly) {
-        input.style.backgroundColor = 'var(--off)';
-        input.style.cursor = 'not-allowed';
-      } else {
-        input.style.backgroundColor = '';
-        input.style.cursor = '';
-      }
-    }
-  });
-
-  // Disable upload zones
-  const uploadZones = document.querySelectorAll('#view-front-matter .upload-zone');
-  uploadZones.forEach(zone => {
-    if (isReadOnly) {
-      zone.style.display = 'none';
-    } else {
-      zone.style.display = 'flex'; // or whatever its default display is
-    }
-  });
 }
 
 // Sync back changes in UI fields to state
@@ -258,7 +201,7 @@ function bindFrontMatterEvents() {
       if (S.activeProject) S.activeProject.title = e.target.value;
     });
   }
-  
+
   const distEl = document.getElementById('fm-district');
   if (distEl) {
     distEl.addEventListener('input', (e) => {
@@ -269,7 +212,7 @@ function bindFrontMatterEvents() {
       if (S.activeProject) S.activeProject.district = e.target.value;
     });
   }
-  
+
   const yearEl = document.getElementById('fm-year');
   if (yearEl) {
     yearEl.addEventListener('input', (e) => {
@@ -277,38 +220,35 @@ function bindFrontMatterEvents() {
       if (S.activeProject) S.activeProject.year = e.target.value;
     });
   }
-  
+
   const prefaceEl = document.getElementById('fm-preface');
   if (prefaceEl) {
     prefaceEl.addEventListener('input', (e) => { S.frontMatter.preface = e.target.value; });
   }
 
-  // Bind inputs without IDs
-  const labels = Array.from(document.querySelectorAll('#view-front-matter label'));
-  
-  const stateLabel = labels.find(el => el.textContent.trim() === 'State');
-  if (stateLabel && stateLabel.nextElementSibling) {
-    stateLabel.nextElementSibling.addEventListener('input', (e) => { S.frontMatter.state = e.target.value; });
+  const stateEl = document.getElementById('fm-state');
+  if (stateEl) {
+    stateEl.addEventListener('input', (e) => { S.frontMatter.state = e.target.value; });
   }
-  
-  const versionLabel = labels.find(el => el.textContent.trim() === 'Version');
-  if (versionLabel && versionLabel.nextElementSibling) {
-    versionLabel.nextElementSibling.addEventListener('input', (e) => { S.frontMatter.version = e.target.value; });
+
+  const versionEl = document.getElementById('fm-version');
+  if (versionEl) {
+    versionEl.addEventListener('input', (e) => { S.frontMatter.version = e.target.value; });
   }
-  
-  const prepLabel = labels.find(el => el.textContent.trim() === 'Prepared By');
-  if (prepLabel && prepLabel.nextElementSibling) {
-    prepLabel.nextElementSibling.addEventListener('input', (e) => { S.frontMatter.preparedBy = e.target.value; });
+
+  const prepEl = document.getElementById('fm-prepared-by');
+  if (prepEl) {
+    prepEl.addEventListener('input', (e) => { S.frontMatter.preparedBy = e.target.value; });
   }
-  
-  const assistLabel = labels.find(el => el.textContent.trim() === 'Assisted By');
-  if (assistLabel && assistLabel.nextElementSibling) {
-    assistLabel.nextElementSibling.addEventListener('input', (e) => { S.frontMatter.assistedBy = e.target.value; });
+
+  const assistEl = document.getElementById('fm-assisted-by');
+  if (assistEl) {
+    assistEl.addEventListener('input', (e) => { S.frontMatter.assistedBy = e.target.value; });
   }
-  
-  const ackLabel = labels.find(el => el.textContent.trim() === 'Acknowledgement Text');
-  if (ackLabel && ackLabel.nextElementSibling) {
-    ackLabel.nextElementSibling.addEventListener('input', (e) => { S.frontMatter.acknowledgement = e.target.value; });
+
+  const ackEl = document.getElementById('fm-acknowledgement');
+  if (ackEl) {
+    ackEl.addEventListener('input', (e) => { S.frontMatter.acknowledgement = e.target.value; });
   }
 }
 
@@ -316,12 +256,12 @@ function bindFrontMatterEvents() {
 window.addEventListener('DOMContentLoaded', () => {
   // Bind inputs
   bindFrontMatterEvents();
-  
-  // Hook loadFrontMatter to openProject
+
+  // Hook loadFrontMatter to openProject using async/await to prevent race conditions
   const originalOpenProject = window.openProject;
   if (typeof originalOpenProject === 'function') {
-    window.openProject = function(id) {
-      originalOpenProject(id);
+    window.openProject = async function (id) {
+      await originalOpenProject(id);
       loadFrontMatter();
     };
   }
@@ -329,7 +269,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Hook loadFrontMatter to showView
   const originalShowView = window.showView;
   if (typeof originalShowView === 'function') {
-    window.showView = function(id, btn, push) {
+    window.showView = function (id, btn, push) {
       originalShowView(id, btn, push);
       if (id === 'front-matter') {
         loadFrontMatter();

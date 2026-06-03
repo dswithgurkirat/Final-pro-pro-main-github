@@ -167,6 +167,12 @@ function showView(id, btn, push = true) {
   if (id==='anx7' && typeof renderPdfUploadUIAnx7 === 'function') renderPdfUploadUIAnx7();
   if (S.activeProject && typeof updateActiveProjectCardUI === 'function') updateActiveProjectCardUI();
   
+  if (['front-matter', 'chapters', 'plates'].includes(id)) {
+    if (window.pdfPreview) window.pdfPreview.show(id);
+  } else {
+    if (window.pdfPreview) window.pdfPreview.hide();
+  }
+
   renderDistrictLegends();
   initLucide();
 }

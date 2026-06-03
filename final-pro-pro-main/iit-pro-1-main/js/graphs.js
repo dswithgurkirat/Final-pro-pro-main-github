@@ -12,7 +12,7 @@ function getYBounds(values) {
   const maxVal = Math.max(...values);
   const diff = maxVal - minVal;
   const pad = Math.max(diff * 0.1, 0.2); // Tighter padding (10% or minimum 0.2m)
-  
+
   // Tighter boundaries round to 1 decimal place to capture small fluctuations
   const min = Math.floor((minVal - pad) * 10) / 10;
   const max = Math.ceil((maxVal + pad) * 10) / 10;
@@ -46,16 +46,16 @@ function chartTooltipOptions() {
 
 function addGraph() {
   const id = 'g' + Date.now();
-  S.graphs.push({ 
-    id, 
-    name: 'PO_JL_NR_ST_28', 
+  S.graphs.push({
+    id,
+    name: 'PO_JL_NR_ST_28',
     dist: '0,25,50',
     post: '227.76,227.75,227.65',
-    red: '224.30', 
-    thal: '223.40', 
-    area: '1.60', 
-    noMine: '0', 
-    bulk: '1.52', 
+    red: '224.30',
+    thal: '223.40',
+    area: '1.60',
+    noMine: '0',
+    bulk: '1.52',
     pct: '60',
     calcThick: '3.0', // Override thickness for volume calculation
     hasSubGraph: false, // Optional Pre-Monsoon comparison graph
@@ -67,57 +67,41 @@ function addGraph() {
     pdfLayout: 1
   });
   renderGraphs();
-  
+
   const platesEl = document.getElementById('view-plates');
-  if(platesEl && platesEl.classList.contains('active')) renderPlates();
+  if (platesEl && platesEl.classList.contains('active')) renderPlates();
 }
 
 function renderGraphs() {
-  Object.values(S.graphCharts).forEach(c => { try { c && c.destroy(); } catch(e) {} });
+  Object.values(S.graphCharts).forEach(c => { try { c && c.destroy(); } catch (e) { } });
   S.graphCharts = {};
   const el = document.getElementById('graph-list'); if (!el) return;
   el.innerHTML = S.graphs.map(g => buildGraphHTML(g)).join('');
   S.graphs.forEach(g => drawGraph(g));
 }
 
-// Hide Add Graph button if read-only
-window.addEventListener('DOMContentLoaded', () => {
-  const originalShowView = window.showView;
-  if (typeof originalShowView === 'function') {
-    window.showView = function(id, btn, push) {
-      originalShowView(id, btn, push);
-      if (id === 'graphs') {
-        const addBtns = document.querySelectorAll('#view-graphs .btn-saffron');
-        addBtns.forEach(addBtn => {
-          if (addBtn) addBtn.style.display = S.role !== 'user' ? 'none' : 'inline-flex';
-        });
-      }
-    };
-  }
-});
-
 function calcGraph(g) {
   const dist = (String(g.dist || '')).split(',').map(Number).filter(v => !isNaN(v));
   const post = (String(g.post || '')).split(',').map(Number).filter(v => !isNaN(v));
-  
+
   // Sub-graph data arrays (support both sub-graph specific keys and original 'pre' properties)
   const subDistSrc = g.subDist !== undefined ? g.subDist : g.dist;
   const subDist = (String(subDistSrc || '')).split(',').map(Number).filter(v => !isNaN(v));
-  
+
   const subElevSrc = g.subElev !== undefined ? g.subElev : g.pre;
   const subElev = (String(subElevSrc || '')).split(',').map(Number).filter(v => !isNaN(v));
-  
+
   const red = Number(g.red) || 0;
   const thal = Number(g.thal) || 0;
-  
+
   const subRed = g.subRed !== undefined ? Number(g.subRed) : red;
   const subThal = g.subThal !== undefined ? Number(g.subThal) : thal;
-  
+
   const area = Number(g.area) || 0;
   const noMine = Number(g.noMine) || 0;
   const bulk = Number(g.bulk) || 1.52;
   const pct = Number(g.pct) || 60;
-  
+
   // Calculate Pre Thickness (Sub-graph)
   const thickPre = subElev.map(e => Math.max(0, e - subRed));
   const avgThickPre = thickPre.length ? thickPre.reduce((a, b) => a + b, 0) / thickPre.length : 0;
@@ -125,7 +109,7 @@ function calcGraph(g) {
   // Calculate Post Thickness (Main Graph)
   const thickPost = post.map(e => Math.max(0, e - red));
   const avgThickPost = thickPost.length ? thickPost.reduce((a, b) => a + b, 0) / thickPost.length : 0;
-  
+
   // Thickness used for calculations (fallback to Post avg if override is empty)
   const activeCalcThick = g.calcThick && !isNaN(Number(g.calcThick)) ? Number(g.calcThick) : avgThickPost;
 
@@ -134,19 +118,19 @@ function calcGraph(g) {
   const tonnes = volume * bulk;
   const allowed = tonnes * (pct / 100);
 
-  return { 
-    dist, post, subDist, subElev, thickPre, avgThickPre, thickPost, avgThickPost, 
-    activeCalcThick, avgThick: activeCalcThick, pArea, volume, tonnes, allowed, 
-    red, thal, subRed, subThal, bulk, area, noMine, pct 
+  return {
+    dist, post, subDist, subElev, thickPre, avgThickPre, thickPost, avgThickPost,
+    activeCalcThick, avgThick: activeCalcThick, pArea, volume, tonnes, allowed,
+    red, thal, subRed, subThal, bulk, area, noMine, pct
   };
 }
 
 function buildGraphHTML(g) {
   const o = calcGraph(g);
   const layout = g.pdfLayout || 1;
-  
+
   // Layout logic for single vs comparison graphs
-  const canvasHTML = g.hasSubGraph 
+  const canvasHTML = g.hasSubGraph
     ? `<div style="display:flex; flex-direction:column; gap:16px;">
          <div class="graph-canvas-container">
            <div class="graph-canvas-header">
@@ -176,31 +160,31 @@ function buildGraphHTML(g) {
     <div class="graph-block-hd">
       <div style="flex:1; display:flex; gap:15px; align-items:center;">
         <span class="graph-block-title">Main Graph (Post-Monsoon)</span>
-        <input value="${g.name}" placeholder="Main Graph Name" oninput="updateG('${g.id}','name',this.value)" class="graph-name-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}>
+        <input value="${g.name}" placeholder="Main Graph Name" oninput="updateG('${g.id}','name',this.value)" class="graph-name-input">
       </div>
-      // PDF Layout Toggle
+      <!-- PDF Layout Toggle -->
       <div class="layout-pill" style="margin-right: 8px;">
         <span class="layout-pill-label">PDF</span>
-        <button class="layout-btn ${layout===1?'active':''}" onclick="updateG('${g.id}','pdfLayout',1)">L1</button>
-        <button class="layout-btn ${layout===2?'active':''}" onclick="updateG('${g.id}','pdfLayout',2)">L2</button>
+        <button class="layout-btn ${layout === 1 ? 'active' : ''}" onclick="updateG('${g.id}','pdfLayout',1)">L1</button>
+        <button class="layout-btn ${layout === 2 ? 'active' : ''}" onclick="updateG('${g.id}','pdfLayout',2)">L2</button>
       </div>
       <button class="btn btn-xs btn-danger" style="margin-right: 8px;" onclick="generatePDF('${g.id}')">Download PDF Report</button>
-      ${S.role === 'user' ? `<button class="btn btn-xs btn-danger" onclick="deleteGraph('${g.id}')">Delete Section</button>` : ''}
+      <button class="btn btn-xs btn-danger" onclick="deleteGraph('${g.id}')">Delete Section</button>
     </div>
     <div class="graph-block-bd">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
         <div class="field-group">
-          <div class="field"><label class="graph-field-label">Distance Array (m)</label><input value="${g.dist}" oninput="updateG('${g.id}','dist',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field"><label class="graph-field-label">Elevation Array (m)</label><input value="${g.post}" oninput="updateG('${g.id}','post',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
+          <div class="field"><label class="graph-field-label">Distance Array (m)</label><input value="${g.dist}" oninput="updateG('${g.id}','dist',this.value)" class="graph-field-input"></div>
+          <div class="field"><label class="graph-field-label">Elevation Array (m)</label><input value="${g.post}" oninput="updateG('${g.id}','post',this.value)" class="graph-field-input"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-content:start">
-          <div class="field"><label class="graph-field-label">Red Line (m)</label><input type="number" step="0.01" value="${g.red}" oninput="updateG('${g.id}','red',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field"><label class="graph-field-label">Thalweg (m)</label><input type="number" step="0.01" value="${g.thal}" oninput="updateG('${g.id}','thal',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field"><label class="graph-field-label">Total Area (Ha)</label><input type="number" step="0.01" value="${g.area}" oninput="updateG('${g.id}','area',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field"><label class="graph-field-label">No-Mine (Ha)</label><input type="number" step="0.01" value="${g.noMine}" oninput="updateG('${g.id}','noMine',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field"><label class="graph-field-label">Density (g/cc)</label><input type="number" step="0.01" value="${g.bulk}" oninput="updateG('${g.id}','bulk',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field"><label class="graph-field-label">Mining %</label><input type="number" value="${g.pct}" oninput="updateG('${g.id}','pct',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-          <div class="field" style="grid-column: span 3;"><label class="graph-field-label-override">Calculation Thickness Override (m)</label><input type="number" step="0.01" value="${g.calcThick || ''}" placeholder="Defaults to Post Avg if empty" oninput="updateG('${g.id}','calcThick',this.value)" class="graph-field-input-override" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
+          <div class="field"><label class="graph-field-label">Red Line (m)</label><input type="number" step="0.01" value="${g.red}" oninput="updateG('${g.id}','red',this.value)" class="graph-field-input"></div>
+          <div class="field"><label class="graph-field-label">Thalweg (m)</label><input type="number" step="0.01" value="${g.thal}" oninput="updateG('${g.id}','thal',this.value)" class="graph-field-input"></div>
+          <div class="field"><label class="graph-field-label">Total Area (Ha)</label><input type="number" step="0.01" value="${g.area}" oninput="updateG('${g.id}','area',this.value)" class="graph-field-input"></div>
+          <div class="field"><label class="graph-field-label">No-Mine (Ha)</label><input type="number" step="0.01" value="${g.noMine}" oninput="updateG('${g.id}','noMine',this.value)" class="graph-field-input"></div>
+          <div class="field"><label class="graph-field-label">Density (g/cc)</label><input type="number" step="0.01" value="${g.bulk}" oninput="updateG('${g.id}','bulk',this.value)" class="graph-field-input"></div>
+          <div class="field"><label class="graph-field-label">Mining %</label><input type="number" value="${g.pct}" oninput="updateG('${g.id}','pct',this.value)" class="graph-field-input"></div>
+          <div class="field" style="grid-column: span 3;"><label class="graph-field-label-override">Calculation Thickness Override (m)</label><input type="number" step="0.01" value="${g.calcThick || ''}" placeholder="Defaults to Post Avg if empty" oninput="updateG('${g.id}','calcThick',this.value)" class="graph-field-input-override"></div>
         </div>
       </div>
       
@@ -208,23 +192,23 @@ function buildGraphHTML(g) {
         <div class="graph-sub-section">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <strong style="color:#eec34a; font-size:13px;">Sub-Graph for Comparison (Pre-Monsoon)</strong>
-            ${S.role === 'user' ? `<button class="btn btn-xs btn-danger" onclick="updateG('${g.id}', 'hasSubGraph', false)">Remove Comparison</button>` : ''}
+            <button class="btn btn-xs btn-danger" onclick="updateG('${g.id}', 'hasSubGraph', false)">Remove Comparison</button>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom: 10px;">
-            <div class="field"><label class="graph-field-label">Pre Name</label><input value="${g.subName || ''}" oninput="updateG('${g.id}','subName',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-            <div class="field"><label class="graph-field-label">Pre Distance (m)</label><input value="${g.subDist || ''}" oninput="updateG('${g.id}','subDist',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-            <div class="field"><label class="graph-field-label">Pre Elevation (m)</label><input value="${g.subElev || ''}" oninput="updateG('${g.id}','subElev',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
+            <div class="field"><label class="graph-field-label">Pre Name</label><input value="${g.subName || ''}" oninput="updateG('${g.id}','subName',this.value)" class="graph-field-input"></div>
+            <div class="field"><label class="graph-field-label">Pre Distance (m)</label><input value="${g.subDist || ''}" oninput="updateG('${g.id}','subDist',this.value)" class="graph-field-input"></div>
+            <div class="field"><label class="graph-field-label">Pre Elevation (m)</label><input value="${g.subElev || ''}" oninput="updateG('${g.id}','subElev',this.value)" class="graph-field-input"></div>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-            <div class="field"><label class="graph-field-label">Pre Red Line (m)</label><input type="number" step="0.01" value="${g.subRed !== undefined ? g.subRed : g.red}" oninput="updateG('${g.id}','subRed',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
-            <div class="field"><label class="graph-field-label">Pre Thalweg (m)</label><input type="number" step="0.01" value="${g.subThal !== undefined ? g.subThal : g.thal}" oninput="updateG('${g.id}','subThal',this.value)" class="graph-field-input" ${S.role !== 'user' ? 'disabled style="background:var(--off); cursor:not-allowed;"' : ''}></div>
+            <div class="field"><label class="graph-field-label">Pre Red Line (m)</label><input type="number" step="0.01" value="${g.subRed !== undefined ? g.subRed : g.red}" oninput="updateG('${g.id}','subRed',this.value)" class="graph-field-input"></div>
+            <div class="field"><label class="graph-field-label">Pre Thalweg (m)</label><input type="number" step="0.01" value="${g.subThal !== undefined ? g.subThal : g.thal}" oninput="updateG('${g.id}','subThal',this.value)" class="graph-field-input"></div>
           </div>
         </div>
-      ` : (S.role === 'user' ? `
+      ` : `
         <div style="margin-bottom: 16px;">
           <button class="btn btn-xs btn-outline" style="background: rgba(238, 195, 74, 0.12); color: #eec34a; border: 1px dashed #eec34a;" onclick="updateG('${g.id}', 'hasSubGraph', true)">+ Add Sub-Graph for Comparison (Pre-Monsoon)</button>
         </div>
-      ` : '')}
+      `}
       
       <div style="display:grid;grid-template-columns:1.5fr 0.5fr;gap:16px">
         <div class="graph-canvas-wrap">${canvasHTML}</div>
@@ -233,17 +217,17 @@ function buildGraphHTML(g) {
             <div class="kpi-item"><div class="kpi-lbl">Post Avg Thick</div><div class="kpi-val" id="kpi-val-avgThickPost-${g.id}">${o.avgThickPost.toFixed(2)}<span class="kpi-unit"> m</span></div></div>
             ${g.hasSubGraph ? `<div class="kpi-item"><div class="kpi-lbl">Pre Avg Thick</div><div class="kpi-val" id="kpi-val-avgThickPre-${g.id}">${o.avgThickPre.toFixed(2)}<span class="kpi-unit"> m</span></div></div>` : ''}
             <div class="kpi-item"><div class="kpi-lbl">Potential Area</div><div class="kpi-val" id="kpi-val-pArea-${g.id}">${o.pArea.toFixed(2)}<span class="kpi-unit"> Ha</span></div></div>
-            <div class="kpi-item"><div class="kpi-lbl">Total Excav.</div><div class="kpi-val" id="kpi-val-allowed-${g.id}">${fmtN(o.allowed,0)}<span class="kpi-unit"> MT</span></div></div>
+            <div class="kpi-item"><div class="kpi-lbl">Total Excav.</div><div class="kpi-val" id="kpi-val-allowed-${g.id}">${fmtN(o.allowed, 0)}<span class="kpi-unit"> MT</span></div></div>
           </div>
           <div class="result-bar">
             <div class="result-lbl" id="result-lbl-pct-${g.id}">Allowed Excavation (${g.pct}%)</div>
-            <div class="result-val" id="result-val-allowed-${g.id}">${fmtN(o.allowed,2)} MT</div>
-            <div class="result-formula" id="result-formula-${g.id}">= ${fmtN(o.pArea,2)} Ha × 10000 × ${o.activeCalcThick.toFixed(2)}m × ${g.bulk} × ${g.pct}%</div>
+            <div class="result-val" id="result-val-allowed-${g.id}">${fmtN(o.allowed, 2)} MT</div>
+            <div class="result-formula" id="result-formula-${g.id}">= ${fmtN(o.pArea, 2)} Ha × 10000 × ${o.activeCalcThick.toFixed(2)}m × ${g.bulk} × ${g.pct}%</div>
           </div>
           <div class="tbl-wrap" style="margin-top:10px;max-height:150px;overflow-y:auto">
             <table class="tbl" style="font-size:11px">
               <thead><tr><th>Dist</th><th>Post</th><th>Thick</th></tr></thead>
-              <tbody id="tbl-tbody-${g.id}">${o.dist.map((d,i)=>`<tr><td>${d}</td><td>${o.post[i]??'—'}</td><td>${(o.thickPost[i]??0).toFixed(2)}</td></tr>`).join('')}</tbody>
+              <tbody id="tbl-tbody-${g.id}">${o.dist.map((d, i) => `<tr><td>${d}</td><td>${o.post[i] ?? '—'}</td><td>${(o.thickPost[i] ?? 0).toFixed(2)}</td></tr>`).join('')}</tbody>
             </table>
           </div>
         </div>
@@ -254,13 +238,13 @@ function buildGraphHTML(g) {
 
 function drawGraph(g) {
   // Destroy previous chart instances to avoid reuse errors on the existing canvas elements
-  try { S.graphCharts[g.id + '_pre']?.destroy(); } catch(e) {}
-  try { S.graphCharts[g.id + '_post']?.destroy(); } catch(e) {}
+  try { S.graphCharts[g.id + '_pre']?.destroy(); } catch (e) { }
+  try { S.graphCharts[g.id + '_post']?.destroy(); } catch (e) { }
   delete S.graphCharts[g.id + '_pre'];
   delete S.graphCharts[g.id + '_post'];
 
   const o = calcGraph(g);
-  
+
   // Calculate independent Y-axis bounds
   const postY = [...o.post, o.red, o.thal].filter(v => !isNaN(v));
   const { min: postYMin, max: postYMax } = getYBounds(postY);
@@ -277,11 +261,11 @@ function drawGraph(g) {
           const meta = chart.getDatasetMeta(i);
           meta.data.forEach((element, index) => {
             ctx.fillStyle = chartLabelColor();
-            ctx.font = '11px "Times New Roman"'; 
+            ctx.font = '11px "Times New Roman"';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             const val = dataset.data[index];
-            if(val !== undefined) ctx.fillText(Number(val).toFixed(2), element.x + 8, element.y - 6);
+            if (val !== undefined) ctx.fillText(Number(val).toFixed(2), element.x + 8, element.y - 6);
           });
         }
       });
@@ -326,8 +310,8 @@ function drawGraph(g) {
         },
         scales: {
           x: {
-            ticks: { 
-              color: chartAxisColor(), 
+            ticks: {
+              color: chartAxisColor(),
               font: { family: 'Times New Roman', size: 12 },
               padding: 8
             },
@@ -336,8 +320,8 @@ function drawGraph(g) {
           y: {
             min: yMin,
             max: yMax,
-            ticks: { 
-              color: chartAxisColor(), 
+            ticks: {
+              color: chartAxisColor(),
               font: { family: 'Times New Roman', size: 12 },
               padding: 10
             },
@@ -349,10 +333,10 @@ function drawGraph(g) {
   };
 
   // Draw Post Graph (Main graph uses its own dynamic bounds)
-  if (document.getElementById('canvas-'+g.id+'-post') && o.dist.length >= 2) {
+  if (document.getElementById('canvas-' + g.id + '-post') && o.dist.length >= 2) {
     const redArrPost = o.dist.map(() => o.red);
     const thalArrPost = o.dist.map(() => o.thal);
-    S.graphCharts[g.id + '_post'] = buildUIChart('canvas-'+g.id+'-post', o.dist, [
+    S.graphCharts[g.id + '_post'] = buildUIChart('canvas-' + g.id + '-post', o.dist, [
       { label: 'Post monsoon Elevation', data: o.post, borderColor: '#da8b4e', backgroundColor: '#da8b4e', pointBackgroundColor: '#8ba3b5', tension: 0.1, pointRadius: 4, borderWidth: 1.5, fill: false },
       { label: 'Red Line', data: redArrPost, borderColor: '#de3b3b', pointBackgroundColor: '#e37878', borderWidth: 1.5, pointRadius: 4, fill: false },
       { label: 'Thalweg', data: thalArrPost, borderColor: '#3b8bba', pointBackgroundColor: '#7db1e3', borderWidth: 1.5, pointRadius: 4, fill: false }
@@ -360,10 +344,10 @@ function drawGraph(g) {
   }
 
   // Draw Pre Graph (Sub graph uses its own independent bounds)
-  if (g.hasSubGraph && document.getElementById('canvas-'+g.id+'-pre') && o.subDist.length >= 2) {
+  if (g.hasSubGraph && document.getElementById('canvas-' + g.id + '-pre') && o.subDist.length >= 2) {
     const redArrPre = o.subDist.map(() => o.subRed);
     const thalArrPre = o.subDist.map(() => o.subThal);
-    S.graphCharts[g.id + '_pre'] = buildUIChart('canvas-'+g.id+'-pre', o.subDist, [
+    S.graphCharts[g.id + '_pre'] = buildUIChart('canvas-' + g.id + '-pre', o.subDist, [
       { label: 'Pre monsoon Elevation', data: o.subElev, borderColor: '#eec34a', backgroundColor: '#eec34a', pointBackgroundColor: '#aab6c2', tension: 0.1, pointRadius: 4, borderWidth: 1.5, fill: false },
       { label: 'Red Line', data: redArrPre, borderColor: '#de3b3b', pointBackgroundColor: '#e37878', borderWidth: 1.5, pointRadius: 4, fill: false },
       { label: 'Thalweg', data: thalArrPre, borderColor: '#3b8bba', pointBackgroundColor: '#7db1e3', borderWidth: 1.5, pointRadius: 4, fill: false }
@@ -372,81 +356,81 @@ function drawGraph(g) {
 }
 
 function updateG(id, key, val) {
-  const g = S.graphs.find(x => x.id === id); 
+  const g = S.graphs.find(x => x.id === id);
   if (!g) return;
-  
+
   if (key === 'hasSubGraph') {
     val = (val === 'true' || val === true);
   }
-  
+
   if (key === 'pdfLayout') {
     val = Number(val);
     g[key] = val;
-    const block = document.getElementById('gs-'+id);
+    const block = document.getElementById('gs-' + id);
     if (block) {
-      try { S.graphCharts[id + '_pre']?.destroy(); } catch(e) {} 
-      try { S.graphCharts[id + '_post']?.destroy(); } catch(e) {} 
-      block.outerHTML = buildGraphHTML(g); 
-      drawGraph(g); 
+      try { S.graphCharts[id + '_pre']?.destroy(); } catch (e) { }
+      try { S.graphCharts[id + '_post']?.destroy(); } catch (e) { }
+      block.outerHTML = buildGraphHTML(g);
+      drawGraph(g);
     }
     return;
   }
 
   g[key] = val;
-  
+
   if (key === 'hasSubGraph' && val === true) {
     if (g.subRed === undefined) g.subRed = g.red;
     if (g.subThal === undefined) g.subThal = g.thal;
     if (!g.subDist) g.subDist = g.dist;
     if (!g.subElev) g.subElev = g.post;
   }
-  
+
   if (key === 'hasSubGraph') {
     // Layout change requires full block re-rendering (outerHTML replacement)
-    try { S.graphCharts[id + '_pre']?.destroy(); } catch(e) {} 
-    try { S.graphCharts[id + '_post']?.destroy(); } catch(e) {} 
-    const block = document.getElementById('gs-'+id);
-    if (block) { 
-      block.outerHTML = buildGraphHTML(g); 
-      drawGraph(g); 
+    try { S.graphCharts[id + '_pre']?.destroy(); } catch (e) { }
+    try { S.graphCharts[id + '_post']?.destroy(); } catch (e) { }
+    const block = document.getElementById('gs-' + id);
+    if (block) {
+      block.outerHTML = buildGraphHTML(g);
+      drawGraph(g);
     }
   } else {
     // Normal keystroke inputs are updated in-place to preserve input focus & cursor placement
     clearTimeout(g._t);
-    g._t = setTimeout(() => { 
+    g._t = setTimeout(() => {
       const o = calcGraph(g);
-      
+
       // Update KPIs
       const elPostAvg = document.getElementById(`kpi-val-avgThickPost-${id}`);
       if (elPostAvg) elPostAvg.innerHTML = `${o.avgThickPost.toFixed(2)}<span class="kpi-unit"> m</span>`;
-      
+
       const elPreAvg = document.getElementById(`kpi-val-avgThickPre-${id}`);
       if (elPreAvg) elPreAvg.innerHTML = `${o.avgThickPre.toFixed(2)}<span class="kpi-unit"> m</span>`;
-      
+
       const elPArea = document.getElementById(`kpi-val-pArea-${id}`);
       if (elPArea) elPArea.innerHTML = `${o.pArea.toFixed(2)}<span class="kpi-unit"> Ha</span>`;
-      
+
       const elAllowed = document.getElementById(`kpi-val-allowed-${id}`);
-      if (elAllowed) elAllowed.innerHTML = `${fmtN(o.allowed,0)}<span class="kpi-unit"> MT</span>`;
-      
+      if (elAllowed) elAllowed.innerHTML = `${fmtN(o.allowed, 0)}<span class="kpi-unit"> MT</span>`;
+
       // Update result bar values and formulas
       const elResultLbl = document.getElementById(`result-lbl-pct-${id}`);
       if (elResultLbl) elResultLbl.textContent = `Allowed Excavation (${g.pct}%)`;
-      
+
       const elResultVal = document.getElementById(`result-val-allowed-${id}`);
-      if (elResultVal) elResultVal.textContent = `${fmtN(o.allowed,2)} MT`;
-      
+      if (elResultVal) elResultVal.textContent = `${fmtN(o.allowed, 2)} MT`;
+
       const elResultFormula = document.getElementById(`result-formula-${id}`);
-      if (elResultFormula) elResultFormula.innerHTML = `= ${fmtN(o.pArea,2)} Ha × 10000 × ${o.activeCalcThick.toFixed(2)}m × ${g.bulk} × ${g.pct}%`;
-      
+      if (elResultFormula) elResultFormula.innerHTML = `= ${fmtN(o.pArea, 2)} Ha × 10000 × ${o.activeCalcThick.toFixed(2)}m × ${g.bulk} × ${g.pct}%`;
+
       // Update table body
       const elTbody = document.getElementById(`tbl-tbody-${id}`);
       if (elTbody) {
-        elTbody.innerHTML = o.dist.map((d,i)=>`<tr><td>${d}</td><td>${o.post[i]??'—'}</td><td>${(o.thickPost[i]??0).toFixed(2)}</td></tr>`).join('');
+        elTbody.innerHTML = o.dist.map((d, i) => `<tr><td>${d}</td><td>${o.post[i] ?? '—'}</td><td>${(o.thickPost[i] ?? 0).toFixed(2)}</td></tr>`).join('');
       }
-      
+
       // Redraw charts on the existing canvases
-      drawGraph(g); 
+      drawGraph(g);
     }, 400);
   }
 }
@@ -454,16 +438,16 @@ function updateG(id, key, val) {
 function deleteGraph(id) {
   customConfirm('Delete this cross section graph?', () => {
     S.graphs = S.graphs.filter(g => g.id !== id);
-    try { S.graphCharts[id + '_pre']?.destroy(); } catch(e) {}
-    try { S.graphCharts[id + '_post']?.destroy(); } catch(e) {}
+    try { S.graphCharts[id + '_pre']?.destroy(); } catch (e) { }
+    try { S.graphCharts[id + '_post']?.destroy(); } catch (e) { }
     delete S.graphCharts[id + '_pre'];
     delete S.graphCharts[id + '_post'];
-    const el = document.getElementById('gs-'+id); 
+    const el = document.getElementById('gs-' + id);
     if (el) el.remove();
     toast('Cross section deleted successfully', 'success');
-    
+
     const platesEl = document.getElementById('view-plates');
-    if(platesEl && platesEl.classList.contains('active')) renderPlates();
+    if (platesEl && platesEl.classList.contains('active')) renderPlates();
   });
 }
 
@@ -483,7 +467,7 @@ function buildPdfChartHelper(g, o, type, canvasEl) {
 
   const yMin = isPre ? preYMin : postYMin;
   const yMax = isPre ? postYMax : postYMax;
-  
+
   const redArr = isPre ? dists.map(() => o.subRed) : dists.map(() => o.red);
   const thalArr = isPre ? dists.map(() => o.subThal) : dists.map(() => o.thal);
 
@@ -509,26 +493,26 @@ function buildPdfChartHelper(g, o, type, canvasEl) {
   };
 
   /* Layout 1 colour scheme (original technical style) */
-  const L1_elev_color  = isPre ? '#eec34a' : '#da8b4e';
-  const L1_red_color   = '#de3b3b';
-  const L1_thal_color  = '#3b8bba';
+  const L1_elev_color = isPre ? '#eec34a' : '#da8b4e';
+  const L1_red_color = '#de3b3b';
+  const L1_thal_color = '#3b8bba';
 
   /* Layout 2 colour scheme (Excel / clean report style) */
-  const L2_elev_color  = '#1f77b4';    // blue — matches clean report scheme
-  const L2_red_color   = '#ff7f0e';    // orange
-  const L2_thal_color  = '#7f7f7f';    // grey
+  const L2_elev_color = '#1f77b4';    // blue — matches clean report scheme
+  const L2_red_color = '#ff7f0e';    // orange
+  const L2_thal_color = '#7f7f7f';    // grey
 
-  const elevColor  = isLayout2 ? L2_elev_color  : L1_elev_color;
-  const redColor   = isLayout2 ? L2_red_color   : L1_red_color;
-  const thalColor  = isLayout2 ? L2_thal_color  : L1_thal_color;
+  const elevColor = isLayout2 ? L2_elev_color : L1_elev_color;
+  const redColor = isLayout2 ? L2_red_color : L1_red_color;
+  const thalColor = isLayout2 ? L2_thal_color : L1_thal_color;
 
-  const elevLabel  = isPre ? (isLayout2 ? 'Pre Monsoon'  : 'Pre monsoon Elevation')  : (isLayout2 ? 'Post Monsoon' : 'Post monsoon Elevation');
-  const redLabel   = isPre ? (isLayout2 ? 'Red Line (Pre-monsoon)'  : 'Red Line')  : (isLayout2 ? 'Red Line (Post-monsoon)'  : 'Red Line');
-  const thalLabel  = isPre ? (isLayout2 ? 'Thalweg Line (Pre-monsoon)'  : 'Thalweg') : (isLayout2 ? 'Thalweg Line (Post-monsoon)' : 'Thalweg');
+  const elevLabel = isPre ? (isLayout2 ? 'Pre Monsoon' : 'Pre monsoon Elevation') : (isLayout2 ? 'Post Monsoon' : 'Post monsoon Elevation');
+  const redLabel = isPre ? (isLayout2 ? 'Red Line (Pre-monsoon)' : 'Red Line') : (isLayout2 ? 'Red Line (Post-monsoon)' : 'Red Line');
+  const thalLabel = isPre ? (isLayout2 ? 'Thalweg Line (Pre-monsoon)' : 'Thalweg') : (isLayout2 ? 'Thalweg Line (Post-monsoon)' : 'Thalweg');
 
   const datasets = [
     { label: elevLabel, data: elevs, borderColor: elevColor, backgroundColor: elevColor, pointBackgroundColor: elevColor, tension: 0.1, pointRadius: isLayout2 ? 3 * dpiScale : 4 * dpiScale, borderWidth: 1.5 * dpiScale, fill: false },
-    { label: redLabel,  data: redArr,  borderColor: redColor,  backgroundColor: redColor,  pointBackgroundColor: redColor,  borderWidth: 1.5 * dpiScale, pointRadius: isLayout2 ? 2 * dpiScale : 4 * dpiScale, fill: false },
+    { label: redLabel, data: redArr, borderColor: redColor, backgroundColor: redColor, pointBackgroundColor: redColor, borderWidth: 1.5 * dpiScale, pointRadius: isLayout2 ? 2 * dpiScale : 4 * dpiScale, fill: false },
     { label: thalLabel, data: thalArr, borderColor: thalColor, backgroundColor: thalColor, pointBackgroundColor: thalColor, borderWidth: 1.5 * dpiScale, pointRadius: isLayout2 ? 2 * dpiScale : 4 * dpiScale, fill: false }
   ];
 
@@ -565,14 +549,14 @@ function buildPdfChartHelper(g, o, type, canvasEl) {
 }
 
 function buildPdfPage_L1(g, o, imgPost, imgPre, pageNum) {
-  const mathStr  = `${o.pArea.toFixed(2)}*10000*${o.activeCalcThick.toFixed(1)}*${g.bulk}=${o.tonnes.toFixed(2)} Tonnes`;
-  const allowedStr = o.allowed.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+  const mathStr = `${o.pArea.toFixed(2)}*10000*${o.activeCalcThick.toFixed(1)}*${g.bulk}=${o.tonnes.toFixed(2)} Tonnes`;
+  const allowedStr = o.allowed.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   if (g.hasSubGraph) {
     const maxLen = Math.max(o.dist.length, o.subDist.length);
     let dualTableRows = '';
     for (let i = 0; i < maxLen; i++) {
-      const preVal  = o.thickPre[i]  !== undefined ? o.thickPre[i].toFixed(2)  : '-';
+      const preVal = o.thickPre[i] !== undefined ? o.thickPre[i].toFixed(2) : '-';
       const postVal = o.thickPost[i] !== undefined ? o.thickPost[i].toFixed(2) : '-';
       dualTableRows += `<tr>
         <td style="background:#f1f3fa;border:1px solid #fff;padding:4px;">${postVal}</td>
@@ -607,10 +591,10 @@ function buildPdfPage_L1(g, o, imgPost, imgPre, pageNum) {
 
       <div style="position:absolute;top:35px;left:360px;width:480px;text-align:center;">
         <div style="font-size:18px;">Cross Section Sand Bar</div>
-        <div style="font-size:16px;font-weight:bold;margin-bottom:5px;">${g.name||'Post Monsoon'}</div>
+        <div style="font-size:16px;font-weight:bold;margin-bottom:5px;">${g.name || 'Post Monsoon'}</div>
         <img src="${imgPost}" style="width:100%;margin-bottom:20px;" />
         
-        <div style="font-size:16px;font-weight:bold;margin-bottom:5px;">${g.subName||'Pre Monsoon'}</div>
+        <div style="font-size:16px;font-weight:bold;margin-bottom:5px;">${g.subName || 'Pre Monsoon'}</div>
         <img src="${imgPre}" style="width:100%;margin-bottom:5px;" />
         <div style="font-size:16px;">Distance of the sand bar from river bank towards river (m)</div>
       </div>
@@ -640,7 +624,7 @@ function buildPdfPage_L1(g, o, imgPost, imgPre, pageNum) {
       <div style="position:absolute;top:20px;left:20px;width:1000px;height:670px;border:1px solid #000;pointer-events:none;"></div>
     </div>`;
   } else {
-    const singleTableRows = o.dist.map((_d,i)=>`<tr><td style="background:#f1f3fa;border:1px solid #fff;padding:4px;">${o.thickPost[i]!==undefined?o.thickPost[i].toFixed(2):'-'}</td></tr>`).join('');
+    const singleTableRows = o.dist.map((_d, i) => `<tr><td style="background:#f1f3fa;border:1px solid #fff;padding:4px;">${o.thickPost[i] !== undefined ? o.thickPost[i].toFixed(2) : '-'}</td></tr>`).join('');
 
     return `
     <div id="pdf-container" style="width:1040px;height:710px;position:relative;background:#fff;color:#000;font-family:'Times New Roman',serif;box-sizing:border-box;font-size:15px;margin:0;overflow:hidden;">
@@ -655,7 +639,7 @@ function buildPdfPage_L1(g, o, imgPost, imgPre, pageNum) {
         <div style="padding-left:18px;position:relative;margin-top:8px;"><span style="position:absolute;left:0;">➢</span>Potential Area(Ha.):${o.pArea.toFixed(2)}</div>
         <div style="padding-left:18px;position:relative;"><span style="position:absolute;left:0;">➢</span>Average Thickness:${o.activeCalcThick.toFixed(2)}</div>
         <div style="padding-left:18px;position:relative;"><span style="position:absolute;left:0;">➢</span>Bulk Density:${g.bulk}</div>
-        <div style="margin:4px 0;font-size:15px;">${mathStr.replace('Tonnes','Ton<br>nes')}</div>
+        <div style="margin:4px 0;font-size:15px;">${mathStr.replace('Tonnes', 'Ton<br>nes')}</div>
         <div style="padding-left:18px;position:relative;"><span style="position:absolute;left:0;">➢</span>Total excavation in Tonnes<br>(Considering ${g.pct}% as per EMGSM,<br>2020)=${allowedStr}</div>
         <div style="margin-top:40px;">
           <div style="display:flex;align-items:center;margin-bottom:6px;"><span style="display:inline-block;width:35px;height:3px;background:#de3b3b;margin-right:8px;"></span> Red Line</div>
@@ -743,39 +727,39 @@ function _buildChartImages(g, o) {
   if (g.hasSubGraph) {
     const w = isLayout2 ? 760 : 460;
     const h = isLayout2 ? 225 : 200;
-    const canPre  = document.createElement('canvas'); canPre.width  = w * dpiScale; canPre.height = h * dpiScale;
+    const canPre = document.createElement('canvas'); canPre.width = w * dpiScale; canPre.height = h * dpiScale;
     const canPost = document.createElement('canvas'); canPost.width = w * dpiScale; canPost.height = h * dpiScale;
-    
+
     canPre.style.position = 'fixed';
     canPre.style.left = '-9999px';
     canPre.style.top = '0';
     canPost.style.position = 'fixed';
     canPost.style.left = '-9999px';
     canPost.style.top = '0';
-    
-    document.body.appendChild(canPre);  
-    document.body.appendChild(canPost); 
 
-    const chartPre  = buildPdfChartHelper(g, o, 'pre',  canPre);
+    document.body.appendChild(canPre);
+    document.body.appendChild(canPost);
+
+    const chartPre = buildPdfChartHelper(g, o, 'pre', canPre);
     const chartPost = buildPdfChartHelper(g, o, 'post', canPost);
-    
+
     chartPre.update();
     chartPost.update();
 
-    imgPre  = canPre.toDataURL('image/png');
+    imgPre = canPre.toDataURL('image/png');
     imgPost = canPost.toDataURL('image/png');
-    
+
     chartPre.destroy(); chartPost.destroy();
     canPre.remove(); canPost.remove();
   } else {
     const w = isLayout2 ? 810 : 600;
     const h = isLayout2 ? 330 : 280;
     const canPost = document.createElement('canvas'); canPost.width = w * dpiScale; canPost.height = h * dpiScale;
-    
+
     canPost.style.position = 'fixed';
     canPost.style.left = '-9999px';
     canPost.style.top = '0';
-    
+
     document.body.appendChild(canPost);
 
     const chartPost = buildPdfChartHelper(g, o, 'post', canPost);
@@ -792,7 +776,7 @@ function generatePDF(id) {
   const g = S.graphs.find(x => x.id === id);
   if (!g) return;
   const o = calcGraph(g);
-  
+
   toast('Assembling PDF, please wait…', 'success');
 
   const { imgPost, imgPre } = _buildChartImages(g, o);
@@ -805,15 +789,15 @@ function generatePDF(id) {
   container.style.top = '0';
   container.style.zIndex = '-100';
   container.style.opacity = '1';
-  container.innerHTML = templateHTML; 
+  container.innerHTML = templateHTML;
   document.body.appendChild(container);
 
   const opt = {
-    margin:       0,
-    filename:     `${(g.hasSubGraph ? g.subName : g.name).replace(/\s+/g, '_')}_Report.pdf`,
-    image:        { type: 'jpeg', quality: 1.0 },
-    html2canvas:  { scale: 3, useCORS: true, letterRendering: true, scrollX: 0, scrollY: 0 },
-    jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+    margin: 0,
+    filename: `${(g.hasSubGraph ? g.subName : g.name).replace(/\s+/g, '_')}_Report.pdf`,
+    image: { type: 'jpeg', quality: 1.0 },
+    html2canvas: { scale: 3, useCORS: true, letterRendering: true, scrollX: 0, scrollY: 0 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
   };
 
   html2pdf().set(opt).from(container.querySelector('#pdf-container')).save().then(() => {
@@ -831,10 +815,10 @@ function generateAllGraphsPDF() {
     toast('No cross-sections available to compile.', 'danger');
     return;
   }
-  
+
   toast('Generating multi-page survey booklet, please wait…', 'success');
   const pagesHTML = [];
-  
+
   for (let idx = 0; idx < S.graphs.length; idx++) {
     const g = S.graphs[idx];
     const o = calcGraph(g);
@@ -851,16 +835,16 @@ function generateAllGraphsPDF() {
   container.style.top = '0';
   container.style.zIndex = '-100';
   container.style.opacity = '1';
-  container.innerHTML = templateHTML; 
+  container.innerHTML = templateHTML;
   document.body.appendChild(container);
 
   const opt = {
-    margin:       0,
-    filename:     'All_Cross_Sections_Consolidated_Report.pdf',
-    image:        { type: 'jpeg', quality: 1.0 },
-    html2canvas:  { scale: 3, useCORS: true, letterRendering: true, scrollX: 0, scrollY: 0 },
-    jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' },
-    pagebreak:    { mode: ['css', 'legacy'] }
+    margin: 0,
+    filename: 'All_Cross_Sections_Consolidated_Report.pdf',
+    image: { type: 'jpeg', quality: 1.0 },
+    html2canvas: { scale: 3, useCORS: true, letterRendering: true, scrollX: 0, scrollY: 0 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+    pagebreak: { mode: ['css', 'legacy'] }
   };
 
   html2pdf().set(opt).from(container.querySelector('#all-pdf-container')).save().then(() => {
