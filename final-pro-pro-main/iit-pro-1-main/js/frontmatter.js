@@ -194,11 +194,16 @@ function loadFrontMatter() {
 
 // Sync back changes in UI fields to state
 function bindFrontMatterEvents() {
+  const notifyFmPreview = () => {
+    if (window.pdfPreview) window.pdfPreview.notifyUpdate('front-matter');
+  };
+
   const titleEl = document.getElementById('fm-title');
   if (titleEl) {
     titleEl.addEventListener('input', (e) => {
       S.frontMatter.title = e.target.value;
       if (S.activeProject) S.activeProject.title = e.target.value;
+      notifyFmPreview();
     });
   }
 
@@ -210,6 +215,7 @@ function bindFrontMatterEvents() {
       const topBadge = document.getElementById('tb-district-badge');
       if (topBadge) topBadge.textContent = e.target.value;
       if (S.activeProject) S.activeProject.district = e.target.value;
+      notifyFmPreview();
     });
   }
 
@@ -218,37 +224,56 @@ function bindFrontMatterEvents() {
     yearEl.addEventListener('input', (e) => {
       S.frontMatter.year = e.target.value;
       if (S.activeProject) S.activeProject.year = e.target.value;
+      notifyFmPreview();
     });
   }
 
   const prefaceEl = document.getElementById('fm-preface');
   if (prefaceEl) {
-    prefaceEl.addEventListener('input', (e) => { S.frontMatter.preface = e.target.value; });
+    prefaceEl.addEventListener('input', (e) => {
+      S.frontMatter.preface = e.target.value;
+      notifyFmPreview();
+    });
   }
 
   const stateEl = document.getElementById('fm-state');
   if (stateEl) {
-    stateEl.addEventListener('input', (e) => { S.frontMatter.state = e.target.value; });
+    stateEl.addEventListener('input', (e) => {
+      S.frontMatter.state = e.target.value;
+      notifyFmPreview();
+    });
   }
 
   const versionEl = document.getElementById('fm-version');
   if (versionEl) {
-    versionEl.addEventListener('input', (e) => { S.frontMatter.version = e.target.value; });
+    versionEl.addEventListener('input', (e) => {
+      S.frontMatter.version = e.target.value;
+      notifyFmPreview();
+    });
   }
 
   const prepEl = document.getElementById('fm-prepared-by');
   if (prepEl) {
-    prepEl.addEventListener('input', (e) => { S.frontMatter.preparedBy = e.target.value; });
+    prepEl.addEventListener('input', (e) => {
+      S.frontMatter.preparedBy = e.target.value;
+      notifyFmPreview();
+    });
   }
 
   const assistEl = document.getElementById('fm-assisted-by');
   if (assistEl) {
-    assistEl.addEventListener('input', (e) => { S.frontMatter.assistedBy = e.target.value; });
+    assistEl.addEventListener('input', (e) => {
+      S.frontMatter.assistedBy = e.target.value;
+      notifyFmPreview();
+    });
   }
 
   const ackEl = document.getElementById('fm-acknowledgement');
   if (ackEl) {
-    ackEl.addEventListener('input', (e) => { S.frontMatter.acknowledgement = e.target.value; });
+    ackEl.addEventListener('input', (e) => {
+      S.frontMatter.acknowledgement = e.target.value;
+      notifyFmPreview();
+    });
   }
 }
 

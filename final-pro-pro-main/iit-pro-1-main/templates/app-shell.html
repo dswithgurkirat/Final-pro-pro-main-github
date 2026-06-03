@@ -4,9 +4,15 @@
 <div id="screen-app" class="screen">
   {{templates/sidebar.html}}
   {{templates/topbar.html}}
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
-    <div class="page-body">
+  <!-- Mobile tab switcher (Editor / Preview) — visible on small screens when preview is active -->
+  <div id="pdf-preview-mobile-tabs" class="pdf-preview-mobile-tabs" aria-hidden="true">
+    <button type="button" class="pdf-preview-mobile-tab active" data-tab="editor">Editor</button>
+    <button type="button" class="pdf-preview-mobile-tab" data-tab="preview">PDF Preview</button>
+  </div>
+  <div class="app-workspace">
+    <!-- MAIN CONTENT (60% when preview open) -->
+    <div class="main-content">
+      <div class="page-body">
       {{templates/views/dashboard.html}}
       {{templates/views/projects.html}}
       {{templates/views/workflow.html}}
@@ -30,8 +36,8 @@
       {{templates/views/generate.html}}
       {{templates/views/history.html}}
       {{templates/views/users.html}}
+      </div>
     </div>
+    {{templates/pdf-preview-panel.html}}
   </div>
-  {{templates/pdf-preview-panel.html}}
 </div>
-

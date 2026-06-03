@@ -25,6 +25,7 @@ const JS_FILES = [
   'js/anx7.js',
   'js/signatures.js',
   'js/pdf.js',
+  'js/pdf-preview.js',
   'js/main.js'
 ];
 
