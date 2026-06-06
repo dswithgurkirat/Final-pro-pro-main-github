@@ -21,7 +21,14 @@ const pdfPreview = {
     'front-matter': 'PDF Preview',
     'chapters': 'PDF Preview',
     'plates': 'PDF Preview',
-    'annexure-b': 'PDF Preview'
+    'annexure-b': 'PDF Preview',
+    'annexure-c': 'PDF Preview',
+    'annexure-d': 'PDF Preview',
+    'annexure-e': 'PDF Preview',
+    'annexure-g': 'PDF Preview',
+    'annexure-h': 'PDF Preview',
+    'annexure-i': 'PDF Preview',
+    'annexure-j': 'PDF Preview'
   },
 
   FM_ORDER: ['cover', 'toc', 'pref', 'ack', 'cert'],
@@ -139,6 +146,13 @@ const pdfPreview = {
       case 'chapters': this.renderChapters(); break;
       case 'plates': this.renderPlates(); break;
       case 'annexure-b': this.renderAnnexureB(); break;
+      case 'annexure-c': this.renderAnnexureC(); break;
+      case 'annexure-d': this.renderAnnexureD(); break;
+      case 'annexure-e': this.renderAnnexureE(); break;
+      case 'annexure-g': this.renderAnnexureG(); break;
+      case 'annexure-h': this.renderAnnexureH(); break;
+      case 'annexure-i': this.renderAnnexureI(); break;
+      case 'annexure-j': this.renderAnnexureJ(); break;
     }
     if (window.initLucide) initLucide();
   },
@@ -373,6 +387,153 @@ const pdfPreview = {
     this.renderPages(this.getAnnexureBPages());
   },
 
+  getAnnexureCPages() {
+    const pages = [];
+    (S.annexureC || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure C — Page ${idx + 1}`
+              : `Annexure C: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureC() {
+    this.renderPages(this.getAnnexureCPages());
+  },
+
+  getAnnexureDPages() {
+    const pages = [];
+    (S.annexureD || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure D — Page ${idx + 1}`
+              : `Annexure D: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureD() {
+    this.renderPages(this.getAnnexureDPages());
+  },
+
+  getAnnexureEPages() {
+    const pages = [];
+    (S.annexureE || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure E — Page ${idx + 1}`
+              : `Annexure E: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureE() {
+    this.renderPages(this.getAnnexureEPages());
+  },
+
+  getAnnexureGPages() {
+    const pages = [];
+    (S.annexureG || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure G — Page ${idx + 1}`
+              : `Annexure G: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureG() {
+    this.renderPages(this.getAnnexureGPages());
+  },
+
+  getAnnexureHPages() {
+    const pages = [];
+    (S.annexureH || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure H — Page ${idx + 1}`
+              : `Annexure H: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureH() {
+    this.renderPages(this.getAnnexureHPages());
+  },
+
+  getAnnexureIPages() {
+    const pages = [];
+    (S.annexureI || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure I — Page ${idx + 1}`
+              : `Annexure I: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureI() {
+    this.renderPages(this.getAnnexureIPages());
+  },
+
+  getAnnexureJPages() {
+    const pages = [];
+    (S.annexureJ || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure J — Page ${idx + 1}`
+              : `Annexure J: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureJ() {
+    this.renderPages(this.getAnnexureJPages());
+  },
+
   renderPages(pages) {
     if (!this.body) return;
     if (!pages || !pages.length) {
@@ -485,7 +646,14 @@ const pdfPreview = {
     const section = this.currentView === 'front-matter' ? 'front-matter'
       : this.currentView === 'chapters' ? 'chapters'
       : this.currentView === 'plates' ? 'plates'
-      : this.currentView === 'annexure-b' ? 'annexure-b' : 'preview';
+      : this.currentView === 'annexure-b' ? 'annexure-b'
+      : this.currentView === 'annexure-c' ? 'annexure-c'
+      : this.currentView === 'annexure-d' ? 'annexure-d'
+      : this.currentView === 'annexure-e' ? 'annexure-e'
+      : this.currentView === 'annexure-g' ? 'annexure-g'
+      : this.currentView === 'annexure-h' ? 'annexure-h'
+      : this.currentView === 'annexure-i' ? 'annexure-i'
+      : this.currentView === 'annexure-j' ? 'annexure-j' : 'preview';
     return `DSR-${dist}-${yr}-${section}.pdf`;
   },
 

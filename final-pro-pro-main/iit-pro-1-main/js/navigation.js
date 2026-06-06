@@ -184,6 +184,13 @@ function showView(id, btn, push = true) {
   if (id==='generate') renderFinalChecklist();
   if (id==='plates') renderPlates(); // Re-render in case new graphs were added
   if (id==='annexure-b' && typeof renderAnnexureB === 'function') renderAnnexureB();
+  if (id==='annexure-c' && typeof renderAnnexureC === 'function') renderAnnexureC();
+  if (id==='annexure-d' && typeof renderAnnexureD === 'function') renderAnnexureD();
+  if (id==='annexure-e' && typeof renderAnnexureE === 'function') renderAnnexureE();
+  if (id==='annexure-g' && typeof renderAnnexureG === 'function') renderAnnexureG();
+  if (id==='annexure-h' && typeof renderAnnexureH === 'function') renderAnnexureH();
+  if (id==='annexure-i' && typeof renderAnnexureI === 'function') renderAnnexureI();
+  if (id==='annexure-j' && typeof renderAnnexureJ === 'function') renderAnnexureJ();
   if (id==='workflow') updateWorkflowDistrictUI();
   if (id==='anx1' && typeof renderPdfUploadUIAnx1 === 'function') renderPdfUploadUIAnx1();
   if (id==='anx2' && typeof renderPdfUploadUIAnx2 === 'function') renderPdfUploadUIAnx2();
@@ -194,7 +201,7 @@ function showView(id, btn, push = true) {
   if (id==='anx7' && typeof renderPdfUploadUIAnx7 === 'function') renderPdfUploadUIAnx7();
   if (S.activeProject && typeof updateActiveProjectCardUI === 'function') updateActiveProjectCardUI();
   
-  if (['front-matter', 'chapters', 'plates', 'annexure-b'].includes(id)) {
+  if (['front-matter', 'chapters', 'plates', 'annexure-b', 'annexure-c', 'annexure-d', 'annexure-e', 'annexure-g', 'annexure-h', 'annexure-i', 'annexure-j'].includes(id)) {
     if (window.pdfPreview) window.pdfPreview.show(id);
   } else {
     if (window.pdfPreview) window.pdfPreview.hide();

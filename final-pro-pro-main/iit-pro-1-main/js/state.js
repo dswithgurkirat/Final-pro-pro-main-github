@@ -60,6 +60,13 @@ const S = {
   ],
   auctionData: [],
   annexureB: [],
+  annexureC: [],
+  annexureD: [],
+  annexureE: [],
+  annexureG: [],
+  annexureH: [],
+  annexureI: [],
+  annexureJ: [],
   uploadedPDFs: {},
   frontMatter: {
     title: 'District Survey Report for Sand Mining',
