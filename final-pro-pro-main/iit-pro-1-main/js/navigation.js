@@ -102,7 +102,24 @@ window.toggleSubMenu = function(id) {
   // Toggle the clicked one
   if (!isVisible) {
     el.style.display = 'block';
+    
+    // Position dynamically using fixed layout to escape sidebar scroll containment
+    const btn = el.previousElementSibling;
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      el.style.position = 'fixed';
+      el.style.top = rect.top + 'px';
+      el.style.left = (rect.right + 5) + 'px';
+      el.style.zIndex = '9999';
+    }
   }
+};
+
+window.toggleMoreAnnexuresInline = function() {
+  const el = document.getElementById('inline-more-annexures');
+  if (!el) return;
+  const isVisible = el.style.display === 'flex';
+  el.style.display = isVisible ? 'none' : 'flex';
 };
 
 function showView(id, btn, push = true) {
@@ -127,6 +144,12 @@ function showView(id, btn, push = true) {
   const el = document.getElementById('view-'+id);
   if (el) el.classList.add('active');
   
+  // Auto-expand the More Annexures inline section if viewing a sub-annexure
+  if (id.startsWith('annexure-')) {
+    const inlineMenu = document.getElementById('inline-more-annexures');
+    if (inlineMenu) inlineMenu.style.display = 'flex';
+  }
+
   // Highlight active sidebar item
   if (btn) {
     btn.classList.add('active');
@@ -146,7 +169,10 @@ function showView(id, btn, push = true) {
     'anx2':'Annexure II — Mining Leases','anx3':'Annexure III — Cluster Details',
     'anx4':'Annexure IV — Transportation Routes','anx5':'Annexure V — Bench Mark & CORS',
     'anx6':'Annexure VI — Final Cluster Details','anx7':'Annexure VII — Transportation Routes',
-    'annexures-extra':'Additional Annexures','demand-table':'Projected Demand Table',
+    'annexure-b':'Annexure B','annexure-c':'Annexure C','annexure-d':'Annexure D',
+    'annexure-e':'Annexure E','annexure-f':'Annexure F','annexure-g':'Annexure G',
+    'annexure-h':'Annexure H','annexure-i':'Annexure I','annexure-j':'Annexure J',
+    'annexure-k':'Annexure K','demand-table':'Projected Demand Table',
     'auction-table':'Auctioned Sites','summary-table':'Source Summary Table','benchmark-table':'Bench Mark & CORS',
     'esign':'E-Signature Panel','generate':'Generate Final PDF','history':'Report History','users':'User Management'
   };
@@ -224,7 +250,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
   });
-  if (typeof updateDarkModeIcon === 'function') updateDarkModeIcon();
+  if (typeof updateDarkModeIcon === 'function') {
+    updateDarkModeIcon();
+  }
+  
+  // Close any open flyout menu when the sidebar is scrolled
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.addEventListener('scroll', () => {
+      document.querySelectorAll('.flyout-menu').forEach(m => m.style.display = 'none');
+    });
+  }
 });
 
 let toastTimer;

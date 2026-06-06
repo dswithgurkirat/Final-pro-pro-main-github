@@ -74,8 +74,22 @@
             Cluster Details</button>
           <button class="sb-item" onclick="showView('anx7',this)"><span class="sb-ico">Ⅶ</span>Annexure VII — Transportation
             Routes</button>
-          <button class="sb-item" onclick="showView('annexures-extra',this)"><span class="sb-ico"><i
-                data-lucide="paperclip"></i></span>More Annexures</button>
+          <div>
+            <button class="sb-item" id="sb-btn-more-annexures" onclick="toggleMoreAnnexuresInline()"><span class="sb-ico"><i
+                  data-lucide="paperclip"></i></span>More Annexures</button>
+            <div id="inline-more-annexures" style="display:none; padding-left: 20px; flex-direction: column;">
+              <button class="sb-item" onclick="showView('annexure-b',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure B</button>
+              <button class="sb-item" onclick="showView('annexure-c',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure C</button>
+              <button class="sb-item" onclick="showView('annexure-d',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure D</button>
+              <button class="sb-item" onclick="showView('annexure-e',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure E</button>
+              <button class="sb-item" onclick="showView('annexure-f',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure F</button>
+              <button class="sb-item" onclick="showView('annexure-g',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure G</button>
+              <button class="sb-item" onclick="showView('annexure-h',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure H</button>
+              <button class="sb-item" onclick="showView('annexure-i',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure I</button>
+              <button class="sb-item" onclick="showView('annexure-j',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure J</button>
+              <button class="sb-item" onclick="showView('annexure-k',this)" style="font-size: 12.5px; min-height: 32px; padding: 6px 12px;">Annexure K</button>
+            </div>
+          </div>
         </div>
         <div class="sb-section" id="tables-nav" style="display:none">
           <div class="sb-section-lbl">Data Tables</div>

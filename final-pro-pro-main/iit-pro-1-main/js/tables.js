@@ -242,14 +242,7 @@ function exportAnxPDF(n) {
 
 function toRoman(n) { return ['I','II','III','IV','V','VI','VII'][n-1]||n; }
 
-function switchAnxTab(id, btn) {
-  ['coords','benchmark','final-clusters','patta-final','desilt-final'].forEach(t=>{
-    const el=document.getElementById('anx-tab-'+t); if(el) el.style.display=t===id?'block':'none';
-  });
-  const tabs = document.querySelectorAll('.feature-tab');
-  tabs.forEach(b=>b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-}
+
 
 /* ══════════════════════════════════════
    DEMAND TABLE
