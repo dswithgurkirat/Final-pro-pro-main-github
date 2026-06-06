@@ -57,8 +57,10 @@
           </button>
         </div>
 
+        <div id="annexure-f-sand-container" class="annexure-f-table-container">
+          <div class="annexure-f-table-block" data-section-type="SAND">
         <div class="tbl-wrap">
-          <table class="anx-tbl" id="annexure-f-sand" style="min-width:1200px">
+          <table class="anx-tbl annexure-f-table" data-section-type="SAND" id="annexure-f-sand" style="min-width:1200px">
             <thead>
               <tr>
                 <th style="width:50px;">Sl. No.</th>
@@ -107,6 +109,15 @@
             <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnnexureF(event, 'SAND')">
           </label>
         </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm btn-pdf-upload" onclick="addAnnexureFTableBlock('SAND')" style="display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="plus-circle" style="width:14px; height:14px;"></i>
+            <span>Add Another Table / Section</span>
+          </button>
+        </div>
       </div>
 
       <div class="anx-section" style="margin-top:32px;">
@@ -118,8 +129,10 @@
           </button>
         </div>
 
+        <div id="annexure-f-benchmark-container" class="annexure-f-table-container">
+          <div class="annexure-f-table-block" data-section-type="BENCHMARK">
         <div class="tbl-wrap">
-          <table class="anx-tbl" id="annexure-f-benchmark" style="min-width:1000px">
+          <table class="anx-tbl annexure-f-table" data-section-type="BENCHMARK" id="annexure-f-benchmark" style="min-width:1000px">
             <thead>
               <tr>
                 <th style="width:50px;">Sl. No.</th>
@@ -186,6 +199,15 @@
             <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnnexureF(event, 'BENCHMARK')">
           </label>
         </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm btn-pdf-upload" onclick="addAnnexureFTableBlock('BENCHMARK')" style="display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="plus-circle" style="width:14px; height:14px;"></i>
+            <span>Add Another Table / Section</span>
+          </button>
+        </div>
       </div>
 
       <div class="anx-section" style="margin-top:32px;">
@@ -197,8 +219,10 @@
           </button>
         </div>
 
+        <div id="annexure-f-cors-container" class="annexure-f-table-container">
+          <div class="annexure-f-table-block" data-section-type="CORS">
         <div class="tbl-wrap">
-          <table class="anx-tbl" id="annexure-f-cors" style="min-width:900px">
+          <table class="anx-tbl annexure-f-table" data-section-type="CORS" id="annexure-f-cors" style="min-width:900px">
             <thead>
               <tr>
                 <th style="width:50px;">Sl. No.</th>
@@ -261,6 +285,15 @@
             <span>Upload Excel (CORS)</span>
             <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnnexureF(event, 'CORS')">
           </label>
+        </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm btn-pdf-upload" onclick="addAnnexureFTableBlock('CORS')" style="display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="plus-circle" style="width:14px; height:14px;"></i>
+            <span>Add Another Table / Section</span>
+          </button>
         </div>
       </div>
 

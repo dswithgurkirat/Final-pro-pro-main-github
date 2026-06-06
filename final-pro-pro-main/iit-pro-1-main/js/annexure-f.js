@@ -3,18 +3,39 @@
 const ANNEXURE_F_TABLES = {
   CORS: {
     tableId: 'annexure-f-cors',
+    containerId: 'annexure-f-cors-container',
     filename: 'Annexure_F_CORS_Stations_Template.csv',
-    headers: ['CORS Station Name', 'Lat', 'Lon', 'Height', 'Station Code']
+    headers: ['CORS Station Name', 'Lat', 'Lon', 'Height', 'Station Code'],
+    emptyRow: ['', '', '', '', '', '', null],
+    addLabel: 'Add CORS Station',
+    uploadLabel: 'Upload Excel (CORS)',
+    minWidth: '900px',
+    pdfTitle: '> Survey of India CORS Stations:',
+    fontSize: 8
   },
   BENCHMARK: {
     tableId: 'annexure-f-benchmark',
+    containerId: 'annexure-f-benchmark-container',
     filename: 'Annexure_F_Benchmark_Template.csv',
-    headers: ['Permanent Bench Mark', 'Coordinates', 'Elevation', 'Sandbars Code']
+    headers: ['Permanent Bench Mark', 'Coordinates', 'Elevation', 'Sandbars Code'],
+    emptyRow: ['', '', '', '', '', null],
+    addLabel: 'Add Benchmark',
+    uploadLabel: 'Upload Excel (Benchmark)',
+    minWidth: '1000px',
+    pdfTitle: '> Permanent Bench Marks:',
+    fontSize: 8
   },
   SAND: {
     tableId: 'annexure-f-sand',
+    containerId: 'annexure-f-sand-container',
     filename: 'Annexure_F_Sand_Ghats_Coordinates_Template.csv',
-    headers: ['SL.NO', 'River Details', 'Sand Bar_Code', 'Lease Details', 'Area (Ha.)', 'Latitude', 'Longitude']
+    headers: ['SL.NO', 'River Details', 'Sand Bar_Code', 'Lease Details', 'Area (Ha.)', 'Latitude', 'Longitude'],
+    emptyRow: ['', '', '', '', '', '', '', null],
+    addLabel: 'Add Sand Ghat',
+    uploadLabel: 'Upload Excel (Sand Ghats)',
+    minWidth: '1200px',
+    pdfTitle: '> Final Block Sand Ghats Coordinates:',
+    fontSize: 7.5
   }
 };
 
@@ -51,9 +72,44 @@ function downloadSectionTemplateAnnexureF(sectionType) {
   URL.revokeObjectURL(url);
 }
 
+function resolveAnnexureFTable(target, sectionType) {
+  if (target && typeof target === 'string') return document.getElementById(target);
+  if (target && target.nodeType === 1) {
+    if (target.matches('table')) return target;
+    const blockTable = target.closest('.annexure-f-table-block')?.querySelector('table');
+    if (blockTable) return blockTable;
+  }
+
+  const cfg = ANNEXURE_F_TABLES[sectionType];
+  return cfg ? document.getElementById(cfg.tableId) : null;
+}
+
+function getAnnexureFTables(sectionType) {
+  const cfg = ANNEXURE_F_TABLES[sectionType];
+  if (!cfg) return [];
+
+  const container = document.getElementById(cfg.containerId);
+  if (container) {
+    const tables = Array.from(container.querySelectorAll(`table.annexure-f-table[data-section-type="${sectionType}"]`));
+    if (tables.length) return tables;
+  }
+
+  const table = document.getElementById(cfg.tableId);
+  return table ? [table] : [];
+}
+
+function getAnnexureFEmptyRow(sectionType) {
+  const cfg = ANNEXURE_F_TABLES[sectionType];
+  if (!cfg) return [];
+  const row = cfg.emptyRow.slice();
+  row[row.length - 1] = annexureFDeleteButtonHTML();
+  return row;
+}
+
 function handleSectionUploadAnnexureF(event, sectionType) {
   const file = event.target.files[0];
   if (!file) return;
+  const table = resolveAnnexureFTable(event.target, sectionType);
 
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -68,7 +124,7 @@ function handleSectionUploadAnnexureF(event, sectionType) {
         return;
       }
 
-      processExcelDataAnnexureF(rows, sectionType);
+      processExcelDataAnnexureF(rows, sectionType, table);
     } catch (error) {
       toast('Error parsing file. Please ensure it is a valid Excel or CSV file.', 'error');
       console.error(error);
@@ -78,7 +134,7 @@ function handleSectionUploadAnnexureF(event, sectionType) {
   reader.readAsArrayBuffer(file);
 }
 
-function processExcelDataAnnexureF(rows, sectionType) {
+function processExcelDataAnnexureF(rows, sectionType, targetTable) {
   const cfg = ANNEXURE_F_TABLES[sectionType];
   if (!cfg) return;
 
@@ -92,13 +148,14 @@ function processExcelDataAnnexureF(rows, sectionType) {
     return;
   }
 
-  const tbody = document.querySelector('#' + cfg.tableId + ' tbody');
+  const table = targetTable || document.getElementById(cfg.tableId);
+  const tbody = table ? table.querySelector('tbody') : null;
   if (!tbody) return;
   tbody.innerHTML = '';
 
   dataRows.forEach((rowData, index) => {
     const normalized = normalizeAnnexureFRow(rowData, sectionType, index);
-    addRowAnnexureF(cfg.tableId, normalized);
+    addRowAnnexureF(table, normalized);
   });
 
   toast(`Uploaded Annexure F ${sectionType.toLowerCase()} data successfully`, 'success');
@@ -156,8 +213,10 @@ function normalizeAnnexureFRow(rowData, sectionType, index) {
 }
 
 function addRowAnnexureF(tableId, cellDataArray) {
-  const tbody = document.querySelector('#' + tableId + ' tbody');
+  const table = resolveAnnexureFTable(tableId);
+  const tbody = table ? table.querySelector('tbody') : null;
   if (!tbody) return;
+  const tableDomId = table.id || '';
 
   const tr = document.createElement('tr');
   cellDataArray.forEach((data, index) => {
@@ -178,9 +237,9 @@ function addRowAnnexureF(tableId, cellDataArray) {
         td.style.cursor = 'not-allowed';
       }
       if (
-        (tableId === 'annexure-f-cors' && (index === 2 || index === 3)) ||
-        (tableId === 'annexure-f-benchmark' && index === 2) ||
-        (tableId === 'annexure-f-sand' && (index === 2 || index === 5 || index === 6))
+        (tableDomId.startsWith('annexure-f-cors') && (index === 2 || index === 3)) ||
+        (tableDomId.startsWith('annexure-f-benchmark') && index === 2) ||
+        (tableDomId.startsWith('annexure-f-sand') && (index === 2 || index === 5 || index === 6))
       ) {
         td.classList.add('coord-input');
       }
@@ -193,6 +252,86 @@ function addRowAnnexureF(tableId, cellDataArray) {
   if (window.initLucide) window.initLucide();
 }
 
+function renumberAnnexureFTableBlocks(sectionType) {
+  const cfg = ANNEXURE_F_TABLES[sectionType];
+  const container = cfg ? document.getElementById(cfg.containerId) : null;
+  if (!container) return;
+
+  const blocks = container.querySelectorAll('.annexure-f-table-block');
+  blocks.forEach((block, index) => {
+    const title = block.querySelector('.annexure-f-block-title');
+    const delBtn = block.querySelector('.annexure-f-delete-table');
+    if (title) title.textContent = index === 0 ? '' : `Table ${index + 1}`;
+    if (delBtn) delBtn.style.display = blocks.length <= 1 ? 'none' : 'inline-flex';
+  });
+}
+
+function deleteAnnexureFTableBlock(btn) {
+  const block = btn.closest('.annexure-f-table-block');
+  if (!block) return;
+  const sectionType = block.getAttribute('data-section-type');
+  const cfg = ANNEXURE_F_TABLES[sectionType];
+  const container = cfg ? document.getElementById(cfg.containerId) : null;
+  if (!container) return;
+
+  if (container.querySelectorAll('.annexure-f-table-block').length <= 1) {
+    toast('You cannot delete the last remaining table.', 'warn');
+    return;
+  }
+
+  if (confirm('Are you sure you want to delete this entire table block?')) {
+    block.remove();
+    renumberAnnexureFTableBlocks(sectionType);
+    toast('Table block deleted.', 'success');
+    if (window.debouncedSaveState) window.debouncedSaveState();
+  }
+}
+
+function addAnnexureFTableBlock(sectionType) {
+  const cfg = ANNEXURE_F_TABLES[sectionType];
+  const container = cfg ? document.getElementById(cfg.containerId) : null;
+  const firstTable = document.getElementById(cfg?.tableId);
+  if (!cfg || !container || !firstTable) return;
+
+  const tableIdx = container.querySelectorAll('.annexure-f-table-block').length + 1;
+  const newTableId = `${cfg.tableId}-${tableIdx}`;
+  const headerHtml = Array.from(firstTable.querySelectorAll('thead th')).map(th => th.outerHTML).join('');
+
+  const blockHtml = `
+    <div class="annexure-f-table-block" data-section-type="${sectionType}" style="margin-top:18px; padding-top:18px; border-top:1px dashed var(--border);">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+        <div class="annexure-f-block-title" style="font-size:12px; font-weight:700; color:var(--text-mid);">Table ${tableIdx}</div>
+        <button class="btn btn-xs btn-danger annexure-f-delete-table" onclick="deleteAnnexureFTableBlock(this)" style="display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
+          <span>Delete Table</span>
+        </button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="anx-tbl annexure-f-table" data-section-type="${sectionType}" id="${newTableId}" style="min-width:${cfg.minWidth}">
+          <thead><tr>${headerHtml}</tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="section-footer" style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="btn btn-xs btn-outline" onclick="addRowAnnexureF(this,getAnnexureFEmptyRow('${sectionType}'))" style="display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="plus" style="width:12px; height:12px;"></i>
+          <span>${cfg.addLabel}</span>
+        </button>
+        <label class="btn btn-excel-upload btn-xs" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:0;">
+          <i data-lucide="upload" style="width:12px; height:12px;"></i>
+          <span>${cfg.uploadLabel}</span>
+          <input type="file" accept=".xlsx,.xls,.csv" hidden onchange="handleSectionUploadAnnexureF(event, '${sectionType}')">
+        </label>
+      </div>
+    </div>`;
+
+  container.insertAdjacentHTML('beforeend', blockHtml);
+  addRowAnnexureF(document.getElementById(newTableId), getAnnexureFEmptyRow(sectionType));
+  renumberAnnexureFTableBlocks(sectionType);
+  if (window.initLucide) window.initLucide();
+  if (window.debouncedSaveState) window.debouncedSaveState();
+}
+
 function delRowAnnexureF(btn) {
   const row = btn.closest('tr');
   if (!row) return;
@@ -201,7 +340,7 @@ function delRowAnnexureF(btn) {
 }
 
 function extractAnnexureFTable(tableId) {
-  const table = document.getElementById(tableId);
+  const table = typeof tableId === 'string' ? document.getElementById(tableId) : tableId;
   if (!table) return { headers: [], rows: [] };
 
   const headers = Array.from(table.querySelectorAll('thead th'))
@@ -219,84 +358,115 @@ function extractAnnexureFTable(tableId) {
 
 async function exportAnnexureFPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('l', 'pt', 'a4');
+  const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginX = 24;
-  let startY = 42;
+  const border = { x: 38, y: 10, w: pageWidth - 76, h: pageHeight - 34 };
+  const tableLeft = 85;
+  const tableWidth = pageWidth - tableLeft - 45;
+  const headerLeft = tableLeft + 4;
+  const footerY = pageHeight - 44;
+  const pageNumberOffset = 490;
+  const district = (S.activeProject && S.activeProject.district) || 'Jalandhar';
+  const state = (S.activeProject && S.activeProject.state) || 'Punjab';
 
-  const drawHeaderFooter = (data) => {
+  const normalizeSectionTitle = (title) => String(title || '')
+    .replace(/^>\s*/, '')
+    .replace(/:$/, '');
+
+  const drawReportFrame = (data) => {
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.8);
+    doc.rect(border.x, border.y, border.w, border.h);
+
+    doc.setFont('times', 'italic');
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text('District Survey Report', headerLeft, 28);
+    doc.text(`${district} District`, headerLeft, 43);
+    doc.text(state, headerLeft, 58);
+
+    doc.setLineWidth(0.4);
+    doc.line(tableLeft, 69, pageWidth - 43, 69);
+
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Enforcement & Monitoring Guidelines for Sand Mining', pageWidth - marginX, 22, { align: 'right' });
+    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY, { align: 'left' });
+    doc.setFont('times', 'bold');
+    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY, { align: 'left' });
+    doc.setFont('times', 'normal');
+    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 12, { align: 'left' });
+    doc.setFont('times', 'bold');
+    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 12, { align: 'left' });
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(0, 0, 0);
-    doc.text('PREPARED BY: SUB-DIVISIONAL COMMITTEE OF JALANDHAR DISTRICT', pageWidth / 2, pageHeight - 18, { align: 'center' });
-    doc.text('ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2, pageHeight - 11, { align: 'center' });
-    doc.text(String(data.pageNumber), pageWidth - marginX, pageHeight - 11, { align: 'right' });
+    doc.setFontSize(12);
+    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 31, pageHeight - 18, { align: 'right' });
   };
 
-  doc.setFont('times', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-  doc.text('Annexure-F', pageWidth - marginX, 34, { align: 'right' });
-
-  const sections = [
-    { title: '> Final Block Sand Ghats Coordinates:', tableId: 'annexure-f-sand', fontSize: 7.5 },
-    { title: '> Permanent Bench Marks:', tableId: 'annexure-f-benchmark', fontSize: 8 },
-    { title: '> Survey of India CORS Stations:', tableId: 'annexure-f-cors', fontSize: 8 }
-  ];
+  const sections = ['SAND', 'BENCHMARK', 'CORS'].flatMap(sectionType => {
+    const cfg = ANNEXURE_F_TABLES[sectionType];
+    return getAnnexureFTables(sectionType).map((table, tableIndex) => ({
+      sectionType,
+      title: tableIndex === 0 ? cfg.pdfTitle : `${cfg.pdfTitle} Table ${tableIndex + 1}`,
+      table,
+      tableId: table.id,
+      fontSize: cfg.fontSize
+    }));
+  });
 
   sections.forEach((section, index) => {
-    const titleHeight = 11;
-    if (index > 0 && startY + titleHeight > pageHeight - 30) {
+    if (index > 0) {
       doc.addPage();
-      startY = 30;
     }
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(10);
+    doc.setFontSize(13);
     doc.setTextColor(0, 0, 0);
-    doc.text(section.title, marginX, startY);
-    startY += titleHeight;
+    doc.text(normalizeSectionTitle(section.title), pageWidth / 2, 104, { align: 'center' });
 
-    const tableData = extractAnnexureFTable(section.tableId);
+    const tableData = extractAnnexureFTable(section.table);
+    const columnStyles = section.tableId && section.tableId.startsWith('annexure-f-sand') ? {
+      0: { cellWidth: 40 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 112 },
+      3: { cellWidth: 54 },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 92 },
+      6: { cellWidth: 91 }
+    } : {};
+
     doc.autoTable({
-      startY,
+      startY: 123,
       head: [tableData.headers],
       body: tableData.rows,
       theme: 'grid',
       styles: {
         font: 'times',
-        fontSize: section.fontSize,
+        fontSize: section.tableId && section.tableId.startsWith('annexure-f-sand') ? 10 : 9,
         textColor: 0,
         lineColor: 0,
-        lineWidth: 0.3,
-        cellPadding: 1.5,
-        valign: 'middle',
-        halign: 'center',
+        lineWidth: 0.5,
+        cellPadding: 2,
+        valign: 'top',
+        halign: 'left',
         minCellHeight: 0
       },
       headStyles: {
         fillColor: false,
         fontStyle: 'bold',
         halign: 'center',
-        textColor: 0
+        valign: 'middle',
+        textColor: 0,
+        lineColor: 0,
+        lineWidth: 0.5,
+        cellPadding: 2
       },
-      columnStyles: section.tableId === 'annexure-f-sand' ? {
-        3: { cellWidth: 140 },
-        5: { cellWidth: 100 },
-        6: { cellWidth: 100 }
-      } : {},
-      margin: { top: 20, bottom: 16 },
-      tableWidth: 'auto',
-      didDrawPage: drawHeaderFooter
+      columnStyles,
+      margin: { top: 123, bottom: 72, left: tableLeft, right: tableLeft },
+      tableWidth,
+      didDrawPage: drawReportFrame
     });
-
-    startY = doc.lastAutoTable.finalY + 10;
   });
 
   await appendAnnexureFAttachmentPages(doc);
@@ -620,6 +790,7 @@ function downloadPdfAnnexureF() {
 function renderAnnexureF() {
   renderPdfUploadUIAnnexureF();
   renderAttachmentUploadUIAnnexureF();
+  ['SAND', 'BENCHMARK', 'CORS'].forEach(renumberAnnexureFTableBlocks);
   if (window.initLucide) window.initLucide();
 }
 
@@ -627,6 +798,9 @@ window.annexureFDeleteButtonHTML = annexureFDeleteButtonHTML;
 window.downloadSectionTemplateAnnexureF = downloadSectionTemplateAnnexureF;
 window.handleSectionUploadAnnexureF = handleSectionUploadAnnexureF;
 window.addRowAnnexureF = addRowAnnexureF;
+window.addAnnexureFTableBlock = addAnnexureFTableBlock;
+window.deleteAnnexureFTableBlock = deleteAnnexureFTableBlock;
+window.getAnnexureFEmptyRow = getAnnexureFEmptyRow;
 window.delRowAnnexureF = delRowAnnexureF;
 window.exportAnnexureFPDF = exportAnnexureFPDF;
 window.handleAttachmentUploadAnnexureF = handleAttachmentUploadAnnexureF;
