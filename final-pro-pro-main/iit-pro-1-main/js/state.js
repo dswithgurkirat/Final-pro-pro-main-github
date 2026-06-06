@@ -59,6 +59,7 @@ const S = {
     'M-sand (Proposed)','M-sand (Existing)','Clusters (Existing & Proposed)'
   ],
   auctionData: [],
+  annexureB: [],
   uploadedPDFs: {},
   frontMatter: {
     title: 'District Survey Report for Sand Mining',

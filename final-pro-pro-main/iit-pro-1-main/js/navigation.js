@@ -183,6 +183,7 @@ function showView(id, btn, push = true) {
   if (id==='esign') renderSignatures();
   if (id==='generate') renderFinalChecklist();
   if (id==='plates') renderPlates(); // Re-render in case new graphs were added
+  if (id==='annexure-b' && typeof renderAnnexureB === 'function') renderAnnexureB();
   if (id==='workflow') updateWorkflowDistrictUI();
   if (id==='anx1' && typeof renderPdfUploadUIAnx1 === 'function') renderPdfUploadUIAnx1();
   if (id==='anx2' && typeof renderPdfUploadUIAnx2 === 'function') renderPdfUploadUIAnx2();
@@ -193,7 +194,7 @@ function showView(id, btn, push = true) {
   if (id==='anx7' && typeof renderPdfUploadUIAnx7 === 'function') renderPdfUploadUIAnx7();
   if (S.activeProject && typeof updateActiveProjectCardUI === 'function') updateActiveProjectCardUI();
   
-  if (['front-matter', 'chapters', 'plates'].includes(id)) {
+  if (['front-matter', 'chapters', 'plates', 'annexure-b'].includes(id)) {
     if (window.pdfPreview) window.pdfPreview.show(id);
   } else {
     if (window.pdfPreview) window.pdfPreview.hide();

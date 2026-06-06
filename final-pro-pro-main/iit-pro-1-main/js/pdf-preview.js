@@ -20,7 +20,8 @@ const pdfPreview = {
   SECTION_TITLES: {
     'front-matter': 'PDF Preview',
     'chapters': 'PDF Preview',
-    'plates': 'PDF Preview'
+    'plates': 'PDF Preview',
+    'annexure-b': 'PDF Preview'
   },
 
   FM_ORDER: ['cover', 'toc', 'pref', 'ack', 'cert'],
@@ -137,6 +138,7 @@ const pdfPreview = {
       case 'front-matter': this.renderFrontMatter(); break;
       case 'chapters': this.renderChapters(); break;
       case 'plates': this.renderPlates(); break;
+      case 'annexure-b': this.renderAnnexureB(); break;
     }
     if (window.initLucide) initLucide();
   },
@@ -350,6 +352,27 @@ const pdfPreview = {
     this.renderPages(this.getPlatePages());
   },
 
+  getAnnexureBPages() {
+    const pages = [];
+    (S.annexureB || []).forEach((p, i) => {
+      if (p.pages && p.pages.length) {
+        p.pages.forEach((img, idx) => {
+          pages.push({
+            src: img,
+            label: p.pages.length > 1
+              ? `Annexure B — Page ${idx + 1}`
+              : `Annexure B: ${p.name}`
+          });
+        });
+      }
+    });
+    return pages;
+  },
+
+  renderAnnexureB() {
+    this.renderPages(this.getAnnexureBPages());
+  },
+
   renderPages(pages) {
     if (!this.body) return;
     if (!pages || !pages.length) {
@@ -461,7 +484,8 @@ const pdfPreview = {
     const yr = ((S.frontMatter && S.frontMatter.year) || 'year').replace('/', '-');
     const section = this.currentView === 'front-matter' ? 'front-matter'
       : this.currentView === 'chapters' ? 'chapters'
-      : this.currentView === 'plates' ? 'plates' : 'preview';
+      : this.currentView === 'plates' ? 'plates'
+      : this.currentView === 'annexure-b' ? 'annexure-b' : 'preview';
     return `DSR-${dist}-${yr}-${section}.pdf`;
   },
 

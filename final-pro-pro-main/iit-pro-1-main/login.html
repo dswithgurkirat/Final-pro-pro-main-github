@@ -2648,16 +2648,33 @@
   <div class="header-row">
     <div>
       <div class="page-title">Annexure B</div>
-      <div class="page-sub">Placeholder page for Annexure B</div>
+      <div class="page-sub">Upload and manage Annexure B PDFs and images</div>
     </div>
+    <button type="button" class="btn btn-primary btn-sm" onclick="addAnnexureB()">
+      + Add Entry
+    </button>
   </div>
-  <div class="card">
-    <div class="card-hd">
-      <div class="card-title">Annexure B Content</div>
+  <div class="g2" style="grid-template-columns: 2fr 1fr;">
+    <div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">Annexure B Entries</div>
+        </div>
+        <div class="card-bd">
+          <div id="annexure-b-list"></div>
+        </div>
+      </div>
     </div>
-    <div class="card-bd">
-      <div id="annexure-b-container">
-        <p style="color: var(--text-soft); font-style: italic;">Annexure B content container is ready for development.</p>
+    <div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">Upload Instructions</div>
+        </div>
+        <div class="card-bd">
+          <p style="color: var(--text-soft); font-size: 14px; line-height: 1.6; margin: 0;">
+            Upload PDF or image files for Annexure B. Each entry supports one file. Click <strong>"Add Entry"</strong> to create additional cards. Use <strong>Replace</strong> to change a file or <strong>Remove</strong> to detach it.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -3424,16 +3441,6 @@
 <script src="js/anx5.js"></script>
 <script src="js/anx6.js"></script>
 <script src="js/anx7.js"></script>
-<script src="js/annexure-b.js"></script>
-<script src="js/annexure-c.js"></script>
-<script src="js/annexure-d.js"></script>
-<script src="js/annexure-e.js"></script>
-<script src="js/annexure-f.js"></script>
-<script src="js/annexure-g.js"></script>
-<script src="js/annexure-h.js"></script>
-<script src="js/annexure-i.js"></script>
-<script src="js/annexure-j.js"></script>
-<script src="js/annexure-k.js"></script>
 <script src="js/signatures.js"></script>
 <script src="js/pdf.js"></script>
 <script src="js/pdf-preview.js"></script>
