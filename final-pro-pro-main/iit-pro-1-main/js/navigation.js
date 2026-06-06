@@ -187,6 +187,7 @@ function showView(id, btn, push = true) {
   if (id==='annexure-c' && typeof renderAnnexureC === 'function') renderAnnexureC();
   if (id==='annexure-d' && typeof renderAnnexureD === 'function') renderAnnexureD();
   if (id==='annexure-e' && typeof renderAnnexureE === 'function') renderAnnexureE();
+  if (id==='annexure-f' && typeof renderAnnexureF === 'function') renderAnnexureF();
   if (id==='annexure-g' && typeof renderAnnexureG === 'function') renderAnnexureG();
   if (id==='annexure-h' && typeof renderAnnexureH === 'function') renderAnnexureH();
   if (id==='annexure-i' && typeof renderAnnexureI === 'function') renderAnnexureI();
