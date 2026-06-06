@@ -222,44 +222,46 @@ async function exportAnnexureFPDF() {
   const doc = new jsPDF('l', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  let startY = 80;
+  const marginX = 24;
+  let startY = 42;
 
   const drawHeaderFooter = (data) => {
     doc.setFont('times', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(59, 130, 246);
-    doc.text('Enforcement & Monitoring Guidelines for Sand Mining', pageWidth - 40, 40, { align: 'right' });
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Enforcement & Monitoring Guidelines for Sand Mining', pageWidth - marginX, 22, { align: 'right' });
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(7);
     doc.setTextColor(0, 0, 0);
-    doc.text('PREPARED BY: SUB-DIVISIONAL COMMITTEE OF JALANDHAR DISTRICT', pageWidth / 2, pageHeight - 40, { align: 'center' });
-    doc.text('ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2, pageHeight - 30, { align: 'center' });
-    doc.text(String(data.pageNumber), pageWidth - 40, pageHeight - 30, { align: 'right' });
+    doc.text('PREPARED BY: SUB-DIVISIONAL COMMITTEE OF JALANDHAR DISTRICT', pageWidth / 2, pageHeight - 18, { align: 'center' });
+    doc.text('ASSISTED BY: RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2, pageHeight - 11, { align: 'center' });
+    doc.text(String(data.pageNumber), pageWidth - marginX, pageHeight - 11, { align: 'right' });
   };
 
   doc.setFont('times', 'bold');
-  doc.setFontSize(12);
+  doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  doc.text('Annexure-F', pageWidth - 40, 55, { align: 'right' });
+  doc.text('Annexure-F', pageWidth - marginX, 34, { align: 'right' });
 
   const sections = [
-    { title: '> Final Block Sand Ghats Coordinates:', tableId: 'annexure-f-sand', fontSize: 8 },
-    { title: '> Permanent Bench Marks:', tableId: 'annexure-f-benchmark', fontSize: 9 },
-    { title: '> Survey of India CORS Stations:', tableId: 'annexure-f-cors', fontSize: 9 }
+    { title: '> Final Block Sand Ghats Coordinates:', tableId: 'annexure-f-sand', fontSize: 7.5 },
+    { title: '> Permanent Bench Marks:', tableId: 'annexure-f-benchmark', fontSize: 8 },
+    { title: '> Survey of India CORS Stations:', tableId: 'annexure-f-cors', fontSize: 8 }
   ];
 
   sections.forEach((section, index) => {
-    if (index > 0 && startY > pageHeight - 220) {
+    const titleHeight = 11;
+    if (index > 0 && startY + titleHeight > pageHeight - 30) {
       doc.addPage();
-      startY = 80;
+      startY = 30;
     }
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
-    doc.text(section.title, 40, startY);
-    startY += 15;
+    doc.text(section.title, marginX, startY);
+    startY += titleHeight;
 
     const tableData = extractAnnexureFTable(section.tableId);
     doc.autoTable({
@@ -272,10 +274,11 @@ async function exportAnnexureFPDF() {
         fontSize: section.fontSize,
         textColor: 0,
         lineColor: 0,
-        lineWidth: 0.5,
-        cellPadding: 3,
+        lineWidth: 0.3,
+        cellPadding: 1.5,
         valign: 'middle',
-        halign: 'center'
+        halign: 'center',
+        minCellHeight: 0
       },
       headStyles: {
         fillColor: false,
@@ -284,14 +287,16 @@ async function exportAnnexureFPDF() {
         textColor: 0
       },
       columnStyles: section.tableId === 'annexure-f-sand' ? {
-        3: { cellWidth: 160 },
-        5: { cellWidth: 120 },
-        6: { cellWidth: 120 }
+        3: { cellWidth: 140 },
+        5: { cellWidth: 100 },
+        6: { cellWidth: 100 }
       } : {},
+      margin: { top: 20, bottom: 16 },
+      tableWidth: 'auto',
       didDrawPage: drawHeaderFooter
     });
 
-    startY = doc.lastAutoTable.finalY + 24;
+    startY = doc.lastAutoTable.finalY + 10;
   });
 
   await appendAnnexureFAttachmentPages(doc);
