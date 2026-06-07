@@ -3271,6 +3271,40 @@
       <div class="page-title">Annexure K</div>
       <div class="page-sub">Proforma auctioned sites and Annexure A source summary.</div>
     </div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <span id="annexure-k-uploaded-filename"
+        style="font-size:12px; color:var(--text-soft); font-weight:600; display:none; padding:4px 8px; background:var(--off); border-radius:var(--r-xs); border:1px solid var(--border);"></span>
+      <button id="annexure-k-preview-btn" class="btn btn-outline btn-sm"
+        style="display:none; align-items:center; gap:6px;" onclick="togglePDFPreviewAnnexureK()"><i data-lucide="eye"
+          style="width:14px; height:14px;"></i> Preview PDF</button>
+      <button id="annexure-k-download-btn" class="btn btn-pdf-download btn-sm" style="display:none;"
+        onclick="downloadPdfAnnexureK()"><i data-lucide="download" style="width:14px; height:14px;"></i> Download
+        PDF</button>
+      <button id="annexure-k-delete-btn" class="btn btn-danger btn-sm"
+        style="display:none; align-items:center; gap:6px;" onclick="deletePdfAnnexureK()"><i data-lucide="trash-2"
+          style="width:14px; height:14px;"></i> Delete PDF</button>
+      <label class="btn btn-pdf-upload btn-sm"
+        style="cursor:pointer; margin-bottom:0; display:inline-flex; align-items:center; gap:6px;">
+        <i data-lucide="upload" style="width:14px; height:14px;"></i>
+        <span>Upload PDF</span>
+        <input type="file" accept="application/pdf" hidden onchange="handlePDFUploadAnnexureK(event)">
+      </label>
+    </div>
+  </div>
+
+  <div id="pdf-preview-section-annexure-k" class="card" style="display: none; border-color: #0ea5e9; margin-bottom: 24px;">
+    <div class="card-bd">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0; font-size: 18px; color: #0369a1;">Uploaded PDF Preview</h3>
+        <button class="btn btn-sm btn-danger" onclick="closePDFPreviewAnnexureK()"
+          style="display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="x" style="width:14px; height:14px;"></i>
+          <span>Close Preview</span>
+        </button>
+      </div>
+      <iframe id="pdf-iframe-annexure-k"
+        style="width: 100%; height: 600px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb;"></iframe>
+    </div>
   </div>
 
   <div class="notif notif-info" style="margin-bottom:16px">
@@ -3293,7 +3327,6 @@
         </div>
 
         <div id="annexure-k-attachment-info" style="margin-top:10px;"></div>
-        <div id="annexure-k-attachment-preview" style="display:none; margin-top:12px;"></div>
       </div>
 
       <div class="anx-section" style="margin-top:32px;">

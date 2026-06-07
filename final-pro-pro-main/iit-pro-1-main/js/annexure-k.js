@@ -352,43 +352,45 @@ async function exportAnnexureKPDF() {
   const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const border = { x: 38, y: 10, w: pageWidth - 76, h: pageHeight - 34 };
-  const tableLeft = 45;
-  const tableWidth = pageWidth - 90;
-  const headerLeft = 85;
-  const footerY = pageHeight - 44;
+  const border = { x: 30, y: 14, w: pageWidth - 60, h: pageHeight - 42 };
+  const tableLeft = 36;
+  const tableWidth = pageWidth - (tableLeft * 2);
+  const headerLeft = tableLeft + 4;
+  const footerY = pageHeight - 38;
   const pageNumberOffset = 490;
   const district = (S.activeProject && S.activeProject.district) || 'Jalandhar';
   const state = (S.activeProject && S.activeProject.state) || 'Punjab';
+  const CONTENT_TOP = 72;
+  let startY = CONTENT_TOP;
 
   const drawReportFrame = (data) => {
     doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.8);
+    doc.setLineWidth(0.6);
     doc.rect(border.x, border.y, border.w, border.h);
 
     doc.setFont('times', 'italic');
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
-    doc.text('District Survey Report', headerLeft, 28);
-    doc.text(`${district} District`, headerLeft, 43);
-    doc.text(state, headerLeft, 58);
+    doc.text('District Survey Report', headerLeft, 27);
+    doc.text(`${district} District`, headerLeft, 39);
+    doc.text(state, headerLeft, 51);
 
     doc.setLineWidth(0.4);
-    doc.line(headerLeft, 69, pageWidth - 43, 69);
+    doc.line(headerLeft, 62, pageWidth - 32, 62);
 
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
-    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY, { align: 'left' });
+    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' });
     doc.setFont('times', 'bold');
-    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY, { align: 'left' });
+    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY - 2, { align: 'left' });
     doc.setFont('times', 'normal');
-    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 12, { align: 'left' });
+    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' });
     doc.setFont('times', 'bold');
-    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 12, { align: 'left' });
+    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(12);
-    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 31, pageHeight - 18, { align: 'right' });
+    doc.setFontSize(10);
+    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
   };
 
   const sections = ['PROFORMA', 'ANNEXURE_A'].flatMap(sectionType => {
@@ -403,29 +405,37 @@ async function exportAnnexureKPDF() {
   });
 
   sections.forEach((section, index) => {
-    if (index > 0) doc.addPage();
-
-    doc.setFont('times', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(0, 0, 0);
-    doc.text(section.title, pageWidth / 2, 104, { align: 'center' });
-
-    const tableData = extractAnnexureKTable(section.table);
+    const titleHeight = 14;
+    const tableStartEstimate = startY + titleHeight + 6;
     const isProforma = section.sectionType === 'PROFORMA';
 
+    if (index > 0 && tableStartEstimate + 40 > pageHeight - 40) {
+      doc.addPage();
+      drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
+      startY = CONTENT_TOP;
+    }
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(section.title, pageWidth / 2, startY, { align: 'center' });
+    startY += titleHeight;
+
+    const tableData = extractAnnexureKTable(section.table);
+
     doc.autoTable({
-      startY: 123,
+      startY,
       head: [tableData.headers],
       body: tableData.rows,
       theme: 'grid',
       styles: {
         font: 'times',
-        fontSize: isProforma ? 5.6 : 8,
+        fontSize: isProforma ? 4.8 : 8.5,
         textColor: 0,
         lineColor: 0,
-        lineWidth: 0.5,
-        cellPadding: isProforma ? 1.2 : 2,
-        valign: 'top',
+        lineWidth: 0.4,
+        cellPadding: isProforma ? 0.9 : 2.5,
+        valign: 'middle',
         halign: 'left',
         overflow: 'linebreak',
         minCellHeight: 0
@@ -437,27 +447,29 @@ async function exportAnnexureKPDF() {
         valign: 'middle',
         textColor: 0,
         lineColor: 0,
-        lineWidth: 0.5,
-        cellPadding: isProforma ? 1.2 : 2
+        lineWidth: 0.4,
+        cellPadding: isProforma ? 0.9 : 2.5
       },
       columnStyles: isProforma ? {
-        0: { cellWidth: 24 },
-        1: { cellWidth: 43 },
-        2: { cellWidth: 36 },
-        3: { cellWidth: 45 },
-        4: { cellWidth: 47 },
-        5: { cellWidth: 48 },
-        6: { cellWidth: 43 },
-        7: { cellWidth: 43 },
+        0: { cellWidth: 22 },
+        1: { cellWidth: 42 },
+        2: { cellWidth: 34 },
+        3: { cellWidth: 42 },
+        4: { cellWidth: 44 },
+        5: { cellWidth: 46 },
+        6: { cellWidth: 42 },
+        7: { cellWidth: 42 },
         8: { cellWidth: 34 },
-        9: { cellWidth: 52 },
-        10: { cellWidth: 52 },
-        11: { cellWidth: 34 }
+        9: { cellWidth: 50 },
+        10: { cellWidth: 50 },
+        11: { cellWidth: 35 }
       } : {},
-      margin: { top: 123, bottom: 72, left: tableLeft, right: tableLeft },
+      margin: { top: startY, bottom: 40, left: tableLeft, right: tableLeft },
       tableWidth,
       didDrawPage: drawReportFrame
     });
+
+    startY = doc.lastAutoTable.finalY + 18;
   });
 
   await appendAnnexureKAttachmentPages(doc);
@@ -491,7 +503,6 @@ function renderAttachmentUploadUIAnnexureK() {
       <div style="padding:14px 16px; border:1px dashed var(--border); border-radius:var(--r-sm); color:var(--text-soft); font-size:13px; background:var(--off);">
         No supporting PDF/image uploaded yet.
       </div>`;
-    renderAttachmentPreviewAnnexureK();
     return;
   }
 
@@ -506,57 +517,9 @@ function renderAttachmentUploadUIAnnexureK() {
           <div style="font-size:10.5px; color:var(--text-faint);">${attachment.fileSize || ''} - ${attachment.pages.length} page(s) will be appended</div>
         </div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button type="button" class="btn btn-xs btn-outline" onclick="renderAttachmentPreviewAnnexureK()" style="display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="eye" style="width:12px; height:12px;"></i>
-          <span>Preview</span>
-        </button>
-        <button type="button" class="btn btn-xs btn-danger" onclick="deleteAttachmentAnnexureK()">Remove</button>
-      </div>
-    </div>`;
-  renderAttachmentPreviewAnnexureK();
-  if (window.initLucide) window.initLucide();
-}
-
-function renderAttachmentPreviewAnnexureK() {
-  const preview = document.getElementById('annexure-k-attachment-preview');
-  if (!preview) return;
-
-  const attachment = getAnnexureKAttachment();
-  if (!attachment || !attachment.pages || !attachment.pages.length) {
-    preview.style.display = 'none';
-    preview.innerHTML = '';
-    return;
-  }
-
-  preview.style.display = 'block';
-  preview.innerHTML = `
-    <div class="card" style="border-color:#0ea5e9; margin-bottom:24px;">
-      <div class="card-bd">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h3 style="margin:0; font-size:18px; color:#0369a1;">Uploaded PDF Preview</h3>
-          <button class="btn btn-sm btn-danger" onclick="closeAttachmentPreviewAnnexureK()" style="display:inline-flex; align-items:center; gap:6px;">
-            <i data-lucide="x" style="width:14px; height:14px;"></i>
-            <span>Close Preview</span>
-          </button>
-        </div>
-        <div style="width:100%; height:600px; overflow:auto; border:1px solid #e5e7eb; border-radius:6px; background:#f9fafb; padding:12px;">
-          ${attachment.pages.map((src, idx) => `
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:4px; padding:8px; margin:0 auto 12px; max-width:760px;">
-              <div style="font-size:11px; font-weight:700; color:var(--text-soft); margin-bottom:6px;">Page ${idx + 1}</div>
-              <img src="${src}" alt="Annexure K upload page ${idx + 1}" style="display:block; width:100%; height:auto; object-fit:contain; background:#fff;">
-            </div>
-          `).join('')}
-        </div>
-      </div>
+      <button type="button" class="btn btn-xs btn-danger" onclick="deleteAttachmentAnnexureK()">Remove</button>
     </div>`;
   if (window.initLucide) window.initLucide();
-}
-
-function closeAttachmentPreviewAnnexureK() {
-  const preview = document.getElementById('annexure-k-attachment-preview');
-  if (!preview) return;
-  preview.style.display = 'none';
 }
 
 function handleAttachmentUploadAnnexureK(event) {
@@ -587,7 +550,6 @@ function handleAttachmentUploadAnnexureK(event) {
         pages: imgs
       });
       renderAttachmentUploadUIAnnexureK();
-      renderAttachmentPreviewAnnexureK();
       if (window.debouncedSaveState) window.debouncedSaveState();
       toast('Supporting PDF added to Annexure K.', 'success');
       event.target.value = '';
@@ -605,7 +567,6 @@ function handleAttachmentUploadAnnexureK(event) {
         pages: [evt.target.result]
       });
       renderAttachmentUploadUIAnnexureK();
-      renderAttachmentPreviewAnnexureK();
       if (window.debouncedSaveState) window.debouncedSaveState();
       toast('Supporting image added to Annexure K.', 'success');
       event.target.value = '';
@@ -621,7 +582,6 @@ function handleAttachmentUploadAnnexureK(event) {
 function deleteAttachmentAnnexureK() {
   setAnnexureKAttachment(null);
   renderAttachmentUploadUIAnnexureK();
-  renderAttachmentPreviewAnnexureK();
   if (window.debouncedSaveState) window.debouncedSaveState();
   toast('Supporting file removed.', 'success');
 }
@@ -657,7 +617,172 @@ async function appendAnnexureKAttachmentPages(doc) {
   }
 }
 
+function renderPdfUploadUIAnnexureK() {
+  const nameEl = document.getElementById('annexure-k-uploaded-filename');
+  const dlBtn = document.getElementById('annexure-k-download-btn');
+  const delBtn = document.getElementById('annexure-k-delete-btn');
+  const previewBtn = document.getElementById('annexure-k-preview-btn');
+  const previewSection = document.getElementById('pdf-preview-section-annexure-k');
+  const iframe = document.getElementById('pdf-iframe-annexure-k');
+
+  if (!nameEl || !dlBtn) return;
+
+  if (!S.activeProject) {
+    nameEl.style.display = 'none';
+    dlBtn.style.display = 'none';
+    if (delBtn) delBtn.style.display = 'none';
+    if (previewBtn) previewBtn.style.display = 'none';
+    if (previewSection) previewSection.style.display = 'none';
+    return;
+  }
+
+  const pdfName = S.activeProject.annexureKPdfName;
+
+  if (!pdfName) {
+    nameEl.style.display = 'none';
+    dlBtn.style.display = 'none';
+    if (delBtn) delBtn.style.display = 'none';
+    if (previewBtn) previewBtn.style.display = 'none';
+    if (previewSection) {
+      previewSection.style.display = 'none';
+      if (iframe) iframe.src = '';
+    }
+  } else {
+    nameEl.textContent = pdfName;
+    nameEl.style.display = 'inline-block';
+    dlBtn.style.display = 'inline-flex';
+    if (delBtn) delBtn.style.display = S.role === 'user' ? 'inline-flex' : 'none';
+    if (previewBtn) previewBtn.style.display = 'inline-flex';
+
+    if (previewSection && previewSection.style.display === 'block' && iframe) {
+      if (S.activeProject.pdfData && S.activeProject.pdfData.annexureK) {
+        iframe.src = S.activeProject.pdfData.annexureK;
+      }
+    }
+  }
+
+  if (window.initLucide) window.initLucide();
+}
+
+function togglePDFPreviewAnnexureK() {
+  const previewSection = document.getElementById('pdf-preview-section-annexure-k');
+  const iframe = document.getElementById('pdf-iframe-annexure-k');
+  if (!previewSection || !iframe) return;
+
+  if (previewSection.style.display === 'block') {
+    previewSection.style.display = 'none';
+    iframe.src = '';
+    return;
+  }
+
+  if (S.activeProject && S.activeProject.pdfData && S.activeProject.pdfData.annexureK) {
+    iframe.src = S.activeProject.pdfData.annexureK;
+    previewSection.style.display = 'block';
+  } else {
+    toast('No PDF preview available. Please re-upload.', 'warn');
+  }
+}
+
+function handlePDFUploadAnnexureK(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.name.toLowerCase().endsWith('.pdf')) {
+    toast('Error: Only PDF files are allowed.', 'danger');
+    event.target.value = '';
+    return;
+  }
+
+  if (!S.activeProject) {
+    toast('Please select and open a project first.', 'warn');
+    event.target.value = '';
+    return;
+  }
+
+  const fileURL = URL.createObjectURL(file);
+  S.activeProject.annexureKPdfName = file.name;
+  if (!S.activeProject.pdfData) S.activeProject.pdfData = {};
+  S.activeProject.pdfData.annexureK = fileURL;
+
+  const pIdx = S.projects.findIndex(p => p.id === S.activeProject.id);
+  if (pIdx !== -1) {
+    S.projects[pIdx].annexureKPdfName = file.name;
+    if (!S.projects[pIdx].pdfData) S.projects[pIdx].pdfData = {};
+    S.projects[pIdx].pdfData.annexureK = fileURL;
+  }
+
+  const iframe = document.getElementById('pdf-iframe-annexure-k');
+  const previewSection = document.getElementById('pdf-preview-section-annexure-k');
+  if (iframe && previewSection) {
+    iframe.src = fileURL;
+    previewSection.style.display = 'block';
+  }
+
+  renderPdfUploadUIAnnexureK();
+  if (window.debouncedSaveState) window.debouncedSaveState();
+  toast('PDF uploaded and preview loaded!', 'success');
+  event.target.value = '';
+}
+
+async function deletePdfAnnexureK() {
+  if (!S.activeProject) return;
+
+  if (!confirm('Are you sure you want to delete the uploaded PDF?')) return;
+
+  const previewSection = document.getElementById('pdf-preview-section-annexure-k');
+  const iframe = document.getElementById('pdf-iframe-annexure-k');
+  if (previewSection) previewSection.style.display = 'none';
+  if (iframe) iframe.src = '';
+
+  if (S.activeProject.pdfData && S.activeProject.pdfData.annexureK && S.activeProject.pdfData.annexureK.startsWith('blob:')) {
+    URL.revokeObjectURL(S.activeProject.pdfData.annexureK);
+  }
+
+  S.activeProject.annexureKPdfName = null;
+  if (!S.activeProject.pdfData) S.activeProject.pdfData = {};
+  S.activeProject.pdfData.annexureK = null;
+
+  const pIdx = S.projects.findIndex(p => p.id === S.activeProject.id);
+  if (pIdx !== -1) {
+    S.projects[pIdx].annexureKPdfName = null;
+    if (!S.projects[pIdx].pdfData) S.projects[pIdx].pdfData = {};
+    S.projects[pIdx].pdfData.annexureK = null;
+  }
+
+  renderPdfUploadUIAnnexureK();
+  if (window.debouncedSaveState) window.debouncedSaveState();
+  toast('PDF deleted successfully.', 'success');
+}
+
+function closePDFPreviewAnnexureK() {
+  const previewSection = document.getElementById('pdf-preview-section-annexure-k');
+  const iframe = document.getElementById('pdf-iframe-annexure-k');
+
+  if (previewSection) previewSection.style.display = 'none';
+  if (iframe) iframe.src = '';
+}
+
+function downloadPdfAnnexureK() {
+  if (!S.activeProject) {
+    toast('Please select and open a project first.', 'warn');
+    return;
+  }
+  if (!S.activeProject.annexureKPdfName || !S.activeProject.pdfData || !S.activeProject.pdfData.annexureK) {
+    toast('No PDF has been uploaded for this project yet. Please upload a PDF first.', 'warn');
+    return;
+  }
+
+  const a = document.createElement('a');
+  a.href = S.activeProject.pdfData.annexureK;
+  a.download = S.activeProject.annexureKPdfName;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 function renderAnnexureK() {
+  renderPdfUploadUIAnnexureK();
   renderAttachmentUploadUIAnnexureK();
   ['PROFORMA', 'ANNEXURE_A'].forEach(renumberAnnexureKTableBlocks);
   if (window.initLucide) window.initLucide();
@@ -675,6 +800,10 @@ window.exportAnnexureKPDF = exportAnnexureKPDF;
 window.handleAttachmentUploadAnnexureK = handleAttachmentUploadAnnexureK;
 window.deleteAttachmentAnnexureK = deleteAttachmentAnnexureK;
 window.renderAttachmentUploadUIAnnexureK = renderAttachmentUploadUIAnnexureK;
-window.renderAttachmentPreviewAnnexureK = renderAttachmentPreviewAnnexureK;
-window.closeAttachmentPreviewAnnexureK = closeAttachmentPreviewAnnexureK;
+window.renderPdfUploadUIAnnexureK = renderPdfUploadUIAnnexureK;
+window.togglePDFPreviewAnnexureK = togglePDFPreviewAnnexureK;
+window.handlePDFUploadAnnexureK = handlePDFUploadAnnexureK;
+window.deletePdfAnnexureK = deletePdfAnnexureK;
+window.closePDFPreviewAnnexureK = closePDFPreviewAnnexureK;
+window.downloadPdfAnnexureK = downloadPdfAnnexureK;
 window.renderAnnexureK = renderAnnexureK;
