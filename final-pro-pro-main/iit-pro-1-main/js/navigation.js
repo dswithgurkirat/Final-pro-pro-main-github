@@ -192,6 +192,7 @@ function showView(id, btn, push = true) {
   if (id==='annexure-h' && typeof renderAnnexureH === 'function') renderAnnexureH();
   if (id==='annexure-i' && typeof renderAnnexureI === 'function') renderAnnexureI();
   if (id==='annexure-j' && typeof renderAnnexureJ === 'function') renderAnnexureJ();
+  if (id==='annexure-k' && typeof renderAnnexureK === 'function') renderAnnexureK();
   if (id==='workflow') updateWorkflowDistrictUI();
   if (id==='anx1' && typeof renderPdfUploadUIAnx1 === 'function') renderPdfUploadUIAnx1();
   if (id==='anx2' && typeof renderPdfUploadUIAnx2 === 'function') renderPdfUploadUIAnx2();

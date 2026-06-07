@@ -361,14 +361,16 @@ async function exportAnnexureFPDF() {
   const doc = new jsPDF('p', 'pt', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const border = { x: 38, y: 10, w: pageWidth - 76, h: pageHeight - 34 };
-  const tableLeft = 85;
-  const tableWidth = pageWidth - tableLeft - 45;
+  const border = { x: 30, y: 14, w: pageWidth - 60, h: pageHeight - 42 };
+  const tableLeft = 52;
+  const tableWidth = pageWidth - tableLeft - 36;
   const headerLeft = tableLeft + 4;
-  const footerY = pageHeight - 44;
+  const footerY = pageHeight - 38;
   const pageNumberOffset = 490;
   const district = (S.activeProject && S.activeProject.district) || 'Jalandhar';
   const state = (S.activeProject && S.activeProject.state) || 'Punjab';
+  const CONTENT_TOP = 72;
+  let startY = CONTENT_TOP;
 
   const normalizeSectionTitle = (title) => String(title || '')
     .replace(/^>\s*/, '')
@@ -376,32 +378,32 @@ async function exportAnnexureFPDF() {
 
   const drawReportFrame = (data) => {
     doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.8);
+    doc.setLineWidth(0.6);
     doc.rect(border.x, border.y, border.w, border.h);
 
     doc.setFont('times', 'italic');
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
-    doc.text('District Survey Report', headerLeft, 28);
-    doc.text(`${district} District`, headerLeft, 43);
-    doc.text(state, headerLeft, 58);
+    doc.text('District Survey Report', headerLeft, 27);
+    doc.text(`${district} District`, headerLeft, 39);
+    doc.text(state, headerLeft, 51);
 
     doc.setLineWidth(0.4);
-    doc.line(tableLeft, 69, pageWidth - 43, 69);
+    doc.line(tableLeft, 62, pageWidth - 32, 62);
 
     doc.setFont('times', 'normal');
     doc.setFontSize(8);
-    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY, { align: 'left' });
+    doc.text('PREPARED BY:', pageWidth / 2 - 130, footerY - 2, { align: 'left' });
     doc.setFont('times', 'bold');
-    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY, { align: 'left' });
+    doc.text(` SUB-DIVISIONAL COMMITTEE OF ${district.toUpperCase()} DISTRICT`, pageWidth / 2 - 76, footerY - 2, { align: 'left' });
     doc.setFont('times', 'normal');
-    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 12, { align: 'left' });
+    doc.text('ASSISTED BY:', pageWidth / 2 - 130, footerY + 10, { align: 'left' });
     doc.setFont('times', 'bold');
-    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 12, { align: 'left' });
+    doc.text(' RSP GREEN DEVELOPMENT AND LABORATORIES PVT. LTD', pageWidth / 2 - 78, footerY + 10, { align: 'left' });
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(12);
-    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 31, pageHeight - 18, { align: 'right' });
+    doc.setFontSize(10);
+    doc.text(String(pageNumberOffset + data.pageNumber), pageWidth - 26, pageHeight - 18, { align: 'right' });
   };
 
   const sections = ['SAND', 'BENCHMARK', 'CORS'].flatMap(sectionType => {
@@ -416,39 +418,45 @@ async function exportAnnexureFPDF() {
   });
 
   sections.forEach((section, index) => {
-    if (index > 0) {
+    const titleHeight = 14;
+    const tableStartEstimate = startY + titleHeight + 6;
+
+    if (index > 0 && tableStartEstimate + 40 > pageHeight - 40) {
       doc.addPage();
+      drawReportFrame({ pageNumber: doc.getCurrentPageInfo().pageNumber });
+      startY = CONTENT_TOP;
     }
 
     doc.setFont('times', 'bold');
-    doc.setFontSize(13);
+    doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
-    doc.text(normalizeSectionTitle(section.title), pageWidth / 2, 104, { align: 'center' });
+    doc.text(normalizeSectionTitle(section.title), pageWidth / 2, startY, { align: 'center' });
+    startY += titleHeight;
 
     const tableData = extractAnnexureFTable(section.table);
     const columnStyles = section.tableId && section.tableId.startsWith('annexure-f-sand') ? {
       0: { cellWidth: 40 },
       1: { cellWidth: 40 },
-      2: { cellWidth: 112 },
-      3: { cellWidth: 54 },
-      4: { cellWidth: 35 },
-      5: { cellWidth: 92 },
-      6: { cellWidth: 91 }
+      2: { cellWidth: 108 },
+      3: { cellWidth: 52 },
+      4: { cellWidth: 34 },
+      5: { cellWidth: 88 },
+      6: { cellWidth: 88 }
     } : {};
 
     doc.autoTable({
-      startY: 123,
+      startY,
       head: [tableData.headers],
       body: tableData.rows,
       theme: 'grid',
       styles: {
         font: 'times',
-        fontSize: section.tableId && section.tableId.startsWith('annexure-f-sand') ? 10 : 9,
+        fontSize: section.tableId && section.tableId.startsWith('annexure-f-sand') ? 9 : 8.5,
         textColor: 0,
         lineColor: 0,
-        lineWidth: 0.5,
-        cellPadding: 2,
-        valign: 'top',
+        lineWidth: 0.4,
+        cellPadding: 2.5,
+        valign: 'middle',
         halign: 'left',
         minCellHeight: 0
       },
@@ -459,14 +467,16 @@ async function exportAnnexureFPDF() {
         valign: 'middle',
         textColor: 0,
         lineColor: 0,
-        lineWidth: 0.5,
-        cellPadding: 2
+        lineWidth: 0.4,
+        cellPadding: 2.5
       },
       columnStyles,
-      margin: { top: 123, bottom: 72, left: tableLeft, right: tableLeft },
+      margin: { top: startY, bottom: 40, left: tableLeft, right: tableLeft },
       tableWidth,
       didDrawPage: drawReportFrame
     });
+
+    startY = doc.lastAutoTable.finalY + 18;
   });
 
   await appendAnnexureFAttachmentPages(doc);
